@@ -40,3 +40,10 @@ export interface DailyStats {
   totalCarbs: number;
   remainingCalories: number;
 }
+export interface WeightRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: number;
+  weight: number; // kg
+  note?: string; // 可選的備註
+}

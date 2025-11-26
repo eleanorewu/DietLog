@@ -4,13 +4,15 @@ import { Dashboard } from './components/Dashboard';
 import { FoodEntry } from './components/FoodEntry';
 import { EditProfile } from './components/EditProfile';
 import { CalendarView } from './components/CalendarView';
-import { FoodLog, UserProfile } from './types';
+import { WeightTracking } from './components/WeightTracking';
+import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, Plus } from 'lucide-react';
-import { getTodayString } from './utils';
+import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 
 // Simple mock for local storage persistence
 const STORAGE_KEY_USER = 'nutrilog_user_v1';
 const STORAGE_KEY_LOGS = 'nutrilog_logs_v1';
+const STORAGE_KEY_WEIGHT_RECORDS = 'nutrilog_weight_records_v1';
 
 type View = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'edit-profile' | 'calendar';
 
@@ -18,6 +20,7 @@ function App() {
   const [view, setView] = useState<View>('onboarding');
   const [user, setUser] = useState<UserProfile | null>(null);
   const [logs, setLogs] = useState<FoodLog[]>([]);
+  const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
   
   // New States for Features
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -27,6 +30,7 @@ function App() {
   useEffect(() => {
     const savedUser = localStorage.getItem(STORAGE_KEY_USER);
     const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
+    const savedWeightRecords = localStorage.getItem(STORAGE_KEY_WEIGHT_RECORDS);
 
     if (savedUser) {
       const parsedUser = JSON.parse(savedUser);
@@ -48,6 +52,10 @@ function App() {
     if (savedLogs) {
       setLogs(JSON.parse(savedLogs));
     }
+
+    if (savedWeightRecords) {
+      setWeightRecords(JSON.parse(savedWeightRecords));
+    }
   }, []);
 
   // Save logs on change
@@ -62,8 +70,23 @@ function App() {
     }
   }, [user]);
 
+  // Save weight records on change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_WEIGHT_RECORDS, JSON.stringify(weightRecords));
+  }, [weightRecords]);
+
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUser(profile);
+    
+    // Create initial weight record
+    const initialRecord: WeightRecord = {
+      id: Date.now().toString(),
+      date: getTodayString(),
+      timestamp: Date.now(),
+      weight: profile.weight,
+    };
+    setWeightRecords([initialRecord]);
+    
     setView('dashboard');
   };
 
@@ -100,12 +123,55 @@ function App() {
     setView('settings');
   };
 
+  const handleUpdateWeight = (newWeight: number) => {
+    if (!user) return;
+
+    // Recalculate all metrics with new weight
+    const bmr = calculateBMR(user.gender, newWeight, user.height, user.age);
+    const tdee = calculateTDEE(bmr, user.activityLevel);
+    const targetCalories = calculateTargetCalories(tdee, user.goal);
+    const macros = calculateMacros(targetCalories, user.goal);
+
+    const updatedProfile: UserProfile = {
+      ...user,
+      weight: newWeight,
+      tdee,
+      targetCalories,
+      targetProtein: macros.protein,
+      targetFat: macros.fat,
+      targetCarbs: macros.carbs,
+    };
+
+    setUser(updatedProfile);
+
+    // Automatically add a weight record when updating weight
+    handleAddWeightRecord(newWeight);
+  };
+
+  const handleAddWeightRecord = (weight: number) => {
+    const today = getTodayString();
+    const newRecord: WeightRecord = {
+      id: Date.now().toString(),
+      date: today,
+      timestamp: Date.now(),
+      weight,
+    };
+    
+    // Remove any existing record from today, keep only the latest
+    setWeightRecords(prev => {
+      const filteredRecords = prev.filter(record => record.date !== today);
+      return [newRecord, ...filteredRecords];
+    });
+  };
+
   const handleReset = () => {
     if (confirm("您確定要刪除所有資料並重置嗎？")) {
         localStorage.removeItem(STORAGE_KEY_USER);
         localStorage.removeItem(STORAGE_KEY_LOGS);
+        localStorage.removeItem(STORAGE_KEY_WEIGHT_RECORDS);
         setUser(null);
         setLogs([]);
+        setWeightRecords([]);
         setEditingLog(null);
         setSelectedDate(getTodayString());
         setView('onboarding');
@@ -168,8 +234,8 @@ function App() {
           )}
 
           {view === 'settings' && user && (
-             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50">
-                <div className="flex items-center mb-8">
+             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 overflow-y-auto no-scrollbar">
+                <div className="flex items-center mb-6">
                    <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
                       <LogOut className="rotate-180" size={24}/>
                    </button>
@@ -177,6 +243,14 @@ function App() {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Weight Tracking Section */}
+                  <WeightTracking
+                    user={user}
+                    weightRecords={weightRecords}
+                    onUpdateWeight={handleUpdateWeight}
+                  />
+
+                  {/* Profile Section */}
                   <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-center mb-4 border-b border-slate-50 pb-2">
                        <h3 className="text-sm font-bold text-slate-400 uppercase">我的個人檔案</h3>
@@ -198,10 +272,6 @@ function App() {
                         <span className="font-bold">{user.tdee} kcal</span>
                       </div>
                       <div className="flex justify-between">
-                         <span className="text-slate-600">目前體重</span>
-                         <span className="font-bold">{user.weight} kg</span>
-                      </div>
-                      <div className="flex justify-between">
                          <span className="text-slate-600">身高</span>
                          <span className="font-bold">{user.height} cm</span>
                       </div>
@@ -214,12 +284,12 @@ function App() {
 
                   <button 
                     onClick={handleReset}
-                    className="w-full flex items-center justify-center p-4 bg-red-50 text-red-600 rounded-xl font-medium mt-auto hover:bg-red-100 transition-colors"
+                    className="w-full flex items-center justify-center p-4 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors"
                   >
                     <Trash2 size={20} className="mr-2" />
                     重置所有資料
                   </button>
-                  <p className="text-center text-xs text-slate-400 mt-4">NutriLog v1.1</p>
+                  <p className="text-center text-xs text-slate-400 mt-4 pb-4">NutriLog v1.2</p>
                 </div>
              </div>
           )}
