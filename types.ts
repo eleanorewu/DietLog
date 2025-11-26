@@ -1,0 +1,40 @@
+export type Gender = 'male' | 'female';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active';
+export type Goal = 'lose' | 'maintain' | 'gain';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+
+export interface UserProfile {
+  name: string;
+  gender: Gender;
+  age: number;
+  height: number; // cm
+  weight: number; // kg
+  activityLevel: ActivityLevel;
+  goal: Goal;
+  tdee: number;
+  targetCalories: number;
+  targetProtein: number;
+  targetFat: number;
+  targetCarbs: number;
+}
+
+export interface FoodLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: number;
+  mealType: MealType;
+  name: string;
+  photoUrl?: string;
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+}
+
+export interface DailyStats {
+  totalCalories: number;
+  totalProtein: number;
+  totalFat: number;
+  totalCarbs: number;
+  remainingCalories: number;
+}
