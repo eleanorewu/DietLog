@@ -104,8 +104,13 @@ function App() {
 
   const handleDeleteFood = (id: string) => {
     setLogs((prev) => prev.filter((item) => item.id !== id));
-    setEditingLog(null);
-    setView('dashboard');
+    // Only reset editing log and change view if we're in the food-entry view
+    if (editingLog && editingLog.id === id) {
+      setEditingLog(null);
+      if (view === 'food-entry') {
+        setView('dashboard');
+      }
+    }
   };
 
   const handleOpenAddFood = () => {
@@ -179,9 +184,13 @@ function App() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex justify-center items-center">
-      {/* Mobile container simulator (fixed iPhone SE size) */}
-      <div className="w-[375px] h-[667px] bg-white rounded-2xl overflow-hidden shadow-2xl relative flex flex-col">
+    <div className="bg-gray-100 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen">
+      {/* Mobile container - fixed size on desktop/tablet, full screen on mobile */}
+      <div className="
+        md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
+        max-md:w-full max-md:h-screen max-md:rounded-none
+        bg-white overflow-hidden relative flex flex-col
+      ">
 
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto no-scrollbar w-full">
@@ -196,6 +205,7 @@ function App() {
               logs={logs} 
               onAddFood={handleOpenAddFood}
               onEditFood={handleOpenEditFood}
+              onDeleteFood={handleDeleteFood}
               onOpenSettings={() => setView('settings')}
               onOpenCalendar={() => setView('calendar')}
               selectedDate={selectedDate}

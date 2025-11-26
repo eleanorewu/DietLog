@@ -1,14 +1,16 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FoodLog, UserProfile, MealType } from '../types';
-import { Flame, Droplet, Wheat, Dumbbell, ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar } from 'lucide-react';
+import { Flame, Droplet, Wheat, Dumbbell, ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2 } from 'lucide-react';
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
+import { SwipeableItem } from './SwipeableItem';
 
 interface DashboardProps {
   user: UserProfile;
   logs: FoodLog[];
   onAddFood: () => void;
   onEditFood: (log: FoodLog) => void;
+  onDeleteFood: (id: string) => void;
   selectedDate: string;
   onDateChange: (date: string) => void;
   onOpenSettings: () => void;
@@ -20,6 +22,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   logs, 
   onAddFood, 
   onEditFood,
+  onDeleteFood,
   selectedDate,
   onDateChange,
   onOpenSettings,
@@ -113,32 +116,53 @@ export const Dashboard: React.FC<DashboardProps> = ({
         ) : (
           <div className="space-y-3">
             {meals.map((meal) => (
-              <div 
-                key={meal.id} 
-                onClick={() => !isFutureDate_flag && onEditFood(meal)}
-                className={`bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center transition-transform ${
-                  isFutureDate_flag 
-                    ? 'opacity-60 cursor-not-allowed' 
-                    : 'active:scale-[0.98] cursor-pointer'
-                }`}
+              <SwipeableItem 
+                key={meal.id}
+                onDelete={() => onDeleteFood(meal.id)}
+                disabled={isFutureDate_flag}
               >
-                <div className="w-12 h-12 rounded-lg bg-slate-100 mr-3 overflow-hidden flex-shrink-0">
-                  {meal.photoUrl ? (
-                    <img src={meal.photoUrl} alt={meal.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                      <Flame size={16} />
-                    </div>
+                <div 
+                  onClick={() => !isFutureDate_flag && onEditFood(meal)}
+                  className={`bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center transition-transform group ${
+                    isFutureDate_flag 
+                      ? 'opacity-60 cursor-not-allowed' 
+                      : 'active:scale-[0.98] cursor-pointer hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-lg bg-slate-100 mr-3 overflow-hidden flex-shrink-0">
+                    {meal.photoUrl ? (
+                      <img src={meal.photoUrl} alt={meal.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <Flame size={16} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-slate-800 text-sm">{meal.name}</h4>
+                    <p className="text-xs text-slate-500">
+                      蛋:{meal.protein} 脂:{meal.fat} 碳:{meal.carbs}
+                    </p>
+                  </div>
+                  <div className="text-emerald-600 font-bold text-sm mr-2">{meal.calories}</div>
+                  
+                  {/* 桌面版刪除按鈕 - 懸停時顯示 */}
+                  {!isFutureDate_flag && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('確定要刪除這筆記錄嗎？')) {
+                          onDeleteFood(meal.id);
+                        }
+                      }}
+                      className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-lg"
+                      title="刪除記錄"
+                    >
+                      <Trash2 size={16} className="text-red-500" />
+                    </button>
                   )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-slate-800 text-sm">{meal.name}</h4>
-                  <p className="text-xs text-slate-500">
-                    蛋:{meal.protein} 脂:{meal.fat} 碳:{meal.carbs}
-                  </p>
-                </div>
-                <div className="text-emerald-600 font-bold text-sm">{meal.calories}</div>
-              </div>
+              </SwipeableItem>
             ))}
           </div>
         )}
