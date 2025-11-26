@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityLevel, Goal, UserProfile } from '../types';
-import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE } from '../utils';
+import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
 import { Button } from './Button';
 import { User, Activity, Target, LogOut } from 'lucide-react';
 
@@ -24,9 +24,17 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Normalize numeric inputs for BMI display in EditProfile
+  const heightNum = Number(formData.height);
+  const weightNum = Number(formData.weight);
+  const hasValidHeightWeight = Number.isFinite(heightNum) && Number.isFinite(weightNum) && heightNum > 0 && weightNum > 0;
+  const bmiValue = hasValidHeightWeight ? calculateBMI(weightNum, heightNum) : null;
+
   const handleSave = () => {
     // Recalculate stats based on new input
-    const bmr = calculateBMR(user.gender, formData.weight, formData.height, formData.age);
+    const weightVal = Number(formData.weight);
+    const heightVal = Number(formData.height);
+    const bmr = calculateBMR(user.gender, weightVal, heightVal, formData.age);
     const tdee = calculateTDEE(bmr, formData.activityLevel);
     const targetCalories = calculateTargetCalories(tdee, formData.goal);
     const macros = calculateMacros(targetCalories, formData.goal);
@@ -34,6 +42,8 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
     const updatedProfile: UserProfile = {
       ...user,
       ...formData,
+      height: heightVal,
+      weight: weightVal,
       tdee,
       targetCalories,
       targetProtein: macros.protein,
@@ -73,7 +83,8 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <input
                 type="number"
                 value={formData.height}
-                onChange={(e) => handleChange('height', parseInt(e.target.value) || 0)}
+                placeholder="範例: 165"
+                onChange={(e) => handleChange('height', e.target.value === '' ? '' : parseInt(e.target.value))}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
               />
             </div>
@@ -82,10 +93,65 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <input
                 type="number"
                 value={formData.weight}
-                onChange={(e) => handleChange('weight', parseInt(e.target.value) || 0)}
+                placeholder="範例: 60"
+                onChange={(e) => handleChange('weight', e.target.value === '' ? '' : parseInt(e.target.value))}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
               />
             </div>
+          </div>
+
+          {/* BMI Display with Progress Bar - left-aligned vertical layout */}
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 p-4 rounded-lg">
+            <p className="text-xs font-semibold text-slate-600 mb-3">體重數值 (BMI)</p>
+            
+            {/* BMI Number - large and bold */}
+            {bmiValue ? (
+              <p className={`text-3xl font-bold ${getBMICategory(bmiValue).color} mb-1`}>{bmiValue}</p>
+            ) : (
+              <p className="text-sm text-slate-400" style={{ fontSize: '14px', marginBottom: '12px' }}>請填寫身高體重計算</p>
+            )}
+            
+            {/* Category label */}
+            {bmiValue && (
+              <p className={`text-sm font-semibold ${getBMICategory(bmiValue).color} mb-3`}>{getBMICategory(bmiValue).category}</p>
+            )}
+
+            {/* BMI Progress Bar */}
+            {bmiValue && (
+              <div className="mb-3">
+                <div className="flex items-center relative rounded-full shadow-md" style={{ height: '14px', overflow: 'visible', background: 'linear-gradient(to right, #3B82F6 0%, #3B82F6 20%, #10B981 20%, #10B981 40%, #F59E0B 40%, #F59E0B 60%, #EF8E51 60%, #EF8E51 80%, #EF4444 80%, #EF4444 100%)' }}>
+                  {/* BMI Position Indicator - 16x16, above the bar; only show when valid */}
+                  {hasValidHeightWeight && (
+                    <div
+                      className="absolute bg-white rounded-full flex items-center justify-center"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        left: `${Math.min(Math.max((bmiValue! - 15) / (40 - 15) * 100, 0), 100)}%`,
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 50,
+                        boxShadow: '0 4px 8px rgba(15, 23, 42, 0.12)'
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* BMI Scale Labels */}
+                <div className="flex justify-between text-xs font-semibold text-slate-600 px-1 mt-1">
+                  <span>18.5</span>
+                  <span>24</span>
+                  <span>27</span>
+                  <span>30</span>
+                  <span>35</span>
+                </div>
+              </div>
+            )}
+
+            {/* Tip text - only when BMI available */}
+            {bmiValue && (
+              <p className="text-sm text-slate-600">{getBMIDescription(bmiValue)}</p>
+            )}
           </div>
         </div>
 

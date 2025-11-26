@@ -1,5 +1,35 @@
 import { ActivityLevel, Gender, Goal, UserProfile } from './types';
 
+export const calculateBMI = (weight: number, height: number): number => {
+  // BMI = 體重(kg) / (身高(m) ^ 2)
+  const heightInMeters = height / 100;
+  return Math.round((weight / (heightInMeters * heightInMeters)) * 10) / 10;
+};
+
+export const getBMICategory = (bmi: number): { category: string; color: string } => {
+  if (bmi < 18.5) {
+    return { category: '體重過輕', color: 'text-blue-600' };
+  } else if (bmi < 24) {
+    return { category: '正常體重', color: 'text-emerald-600' };
+  } else if (bmi < 27) {
+    return { category: '體重過重', color: 'text-amber-600' };
+  } else {
+    return { category: '肥胖', color: 'text-red-600' };
+  }
+};
+
+export const getBMIDescription = (bmi: number): string => {
+  if (bmi < 18.5) {
+    return '體重過輕，需要多運動，均衡飲食，以增加體能，維持健康。';
+  } else if (bmi < 24) {
+    return '健康體重，要繼續保持喔！';
+  } else if (bmi < 27) {
+    return '體重過重，趕快開始健康體重管理！';
+  } else {
+    return '肥胖，健康體重管理刻不容緩！';
+  }
+};
+
 export const calculateBMR = (
   gender: Gender,
   weight: number,
