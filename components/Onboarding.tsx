@@ -153,38 +153,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <p className={`text-sm font-semibold ${getBMICategory(bmiValue).color} mb-3`}>{getBMICategory(bmiValue).category}</p>
               )}
 
-              {/* BMI Progress Bar */}
-              {bmiValue && (
-                <div className="mb-3">
-                  <div className="flex items-center relative rounded-full shadow-md" style={{ height: '14px', overflow: 'visible', background: 'linear-gradient(to right, #3B82F6 0%, #3B82F6 20%, #10B981 20%, #10B981 40%, #F59E0B 40%, #F59E0B 60%, #EF8E51 60%, #EF8E51 80%, #EF4444 80%, #EF4444 100%)' }}>
-                    {/* BMI Position Indicator - 16x16, above the bar; only show when valid */}
-                    {hasValidHeightWeight && (
-                      <div
-                        className="absolute bg-white rounded-full flex items-center justify-center"
-                        style={{
-                          width: '16px',
-                          height: '16px',
-                          left: `${Math.min(Math.max((bmiValue! - 15) / (40 - 15) * 100, 0), 100)}%`,
-                          top: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          zIndex: 50,
-                          boxShadow: '0 4px 8px rgba(15, 23, 42, 0.12)'
-                        }}
-                      />
-                    )}
-                  </div>
-
-                  {/* BMI Scale Labels */}
-                  <div className="flex justify-between text-xs font-semibold text-slate-600 px-1 mt-1">
-                    <span>18.5</span>
-                    <span>24</span>
-                    <span>27</span>
-                    <span>30</span>
-                    <span>35</span>
-                  </div>
-                </div>
-              )}
-
               {/* Tip text - only when BMI available */}
               {bmiValue && (
                 <p className="text-sm text-slate-600">{getBMIDescription(bmiValue)}</p>
