@@ -29,7 +29,17 @@ function App() {
     const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser = JSON.parse(savedUser);
+      
+      // Migration: Add default values for new fields if they don't exist
+      if (!parsedUser.targetWeight) {
+        parsedUser.targetWeight = parsedUser.weight - 5; // Default: 5kg less than current
+      }
+      if (!parsedUser.weeklyWeightLoss) {
+        parsedUser.weeklyWeightLoss = 0.5; // Default: 0.5kg per week
+      }
+      
+      setUser(parsedUser);
       setView('dashboard');
     } else {
       setView('onboarding');

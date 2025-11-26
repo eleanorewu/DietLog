@@ -11,6 +11,8 @@ export interface UserProfile {
   weight: number; // kg
   activityLevel: ActivityLevel;
   goal: Goal;
+  targetWeight: number; // kg - 目標體重
+  weeklyWeightLoss: number; // kg/week - 每週減重目標
   tdee: number;
   targetCalories: number;
   targetProtein: number;

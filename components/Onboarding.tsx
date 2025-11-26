@@ -13,36 +13,95 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [formData, setFormData] = useState({
     name: '',
     gender: 'female' as Gender,
-    age: 25,
+    age: '' as number | string,
     // no defaults for height/weight per design request
     height: '' as number | string,
     weight: '' as number | string,
     activityLevel: 'light' as ActivityLevel,
     goal: 'lose' as Goal,
+    targetWeight: '' as number | string,
+    weeklyWeightLoss: '' as number | string,
   });
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Helper function to handle decimal input with max 2 decimal places
+  const handleDecimalInput = (value: string, field: string) => {
+    // Allow empty string
+    if (value === '') {
+      handleChange(field, '');
+      return;
+    }
+    
+    // Allow numbers with up to 2 decimal places
+    const regex = /^\d*\.?\d{0,2}$/;
+    if (regex.test(value)) {
+      handleChange(field, value);
+    }
+  };
+
   // Normalize numeric inputs for BMI display
   const heightNum = Number(formData.height);
   const weightNum = Number(formData.weight);
+  const ageNum = Number(formData.age);
+  const targetWeightNum = Number(formData.targetWeight);
+  const weeklyWeightLossNum = Number(formData.weeklyWeightLoss);
+  
   const hasValidHeightWeight = Number.isFinite(heightNum) && Number.isFinite(weightNum) && heightNum > 0 && weightNum > 0;
   const bmiValue = hasValidHeightWeight ? calculateBMI(weightNum, heightNum) : null;
+
+  // Validation helpers
+  const isStep1Valid = formData.name.trim() !== '' && 
+                       formData.age !== '' && 
+                       Number.isFinite(ageNum) && 
+                       ageNum > 0;
+  
+  const isStep2Valid = formData.height !== '' && 
+                       formData.weight !== '' && 
+                       Number.isFinite(heightNum) && 
+                       Number.isFinite(weightNum) && 
+                       heightNum > 0 && 
+                       weightNum > 0;
+  
+  const isStep4Valid = formData.targetWeight !== '' && 
+                       formData.weeklyWeightLoss !== '' && 
+                       Number.isFinite(targetWeightNum) && 
+                       Number.isFinite(weeklyWeightLossNum) && 
+                       targetWeightNum > 0 && 
+                       weeklyWeightLossNum > 0;
+
+  // Calculate days to reach target weight
+  const calculateDaysToTarget = () => {
+    if (!isStep2Valid || !isStep4Valid) return 0;
+    const weightDiff = Math.abs(weightNum - targetWeightNum);
+    const weeks = weightDiff / weeklyWeightLossNum;
+    return Math.ceil(weeks * 7);
+  };
 
   const handleFinish = () => {
     const weightNum = Number(formData.weight);
     const heightNum = Number(formData.height);
-    const bmr = calculateBMR(formData.gender, weightNum, heightNum, formData.age);
+    const ageNum = Number(formData.age);
+    const targetWeightNum = Number(formData.targetWeight);
+    const weeklyWeightLossNum = Number(formData.weeklyWeightLoss);
+    
+    const bmr = calculateBMR(formData.gender, weightNum, heightNum, ageNum);
     const tdee = calculateTDEE(bmr, formData.activityLevel);
     const targetCalories = calculateTargetCalories(tdee, formData.goal);
     const macros = calculateMacros(targetCalories, formData.goal);
 
     const profile: UserProfile = {
-      ...formData,
+      name: formData.name,
+      gender: formData.gender,
+      age: ageNum,
       height: heightNum,
       weight: weightNum,
+      activityLevel: formData.activityLevel,
+      goal: formData.goal,
+      targetWeight: targetWeightNum,
+      weeklyWeightLoss: weeklyWeightLossNum,
       tdee,
       targetCalories,
       targetProtein: macros.protein,
@@ -66,13 +125,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">請問您的名字是？</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">請問您的名字是？<span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="輸入名字"
+                required
               />
             </div>
             <div>
@@ -94,14 +154,23 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               </div>
             </div>
              <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">年齡</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">年齡<span className="text-red-500">*</span></label>
               <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
                 <User className="text-slate-400 mr-3" />
                 <input
                   type="number"
                   value={formData.age}
-                  onChange={(e) => handleChange('age', parseInt(e.target.value))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '' || (/^\d+$/.test(val) && parseInt(val) > 0)) {
+                      handleChange('age', val);
+                    }
+                  }}
                   className="w-full outline-none"
+                  placeholder="輸入年齡"
+                  min="1"
+                  step="1"
+                  required
                 />
               </div>
             </div>
@@ -111,28 +180,30 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 2 && (
           <div className="space-y-6 animate-fadeIn">
              <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">身高 (cm)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">身高 (cm)<span className="text-red-500">*</span></label>
               <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
                 <Ruler className="text-slate-400 mr-3" />
                 <input
-                  type="number"
+                  type="text"
                   value={formData.height}
-                  placeholder="範例: 165"
-                  onChange={(e) => handleChange('height', e.target.value === '' ? '' : parseInt(e.target.value))}
+                  placeholder="範例: 165.5"
+                  onChange={(e) => handleDecimalInput(e.target.value, 'height')}
                   className="w-full outline-none"
+                  required
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">體重 (kg)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">體重 (kg)<span className="text-red-500">*</span></label>
               <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
                 <Weight className="text-slate-400 mr-3" />
                 <input
-                  type="number"
+                  type="text"
                   value={formData.weight}
-                  placeholder="範例: 60"
-                  onChange={(e) => handleChange('weight', e.target.value === '' ? '' : parseInt(e.target.value))}
+                  placeholder="範例: 60.45"
+                  onChange={(e) => handleDecimalInput(e.target.value, 'weight')}
                   className="w-full outline-none"
+                  required
                 />
               </div>
             </div>
@@ -217,6 +288,57 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             </div>
           </div>
         )}
+
+        {step === 5 && (
+          <div className="space-y-6 animate-fadeIn">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">目標體重 (kg)<span className="text-red-500">*</span></label>
+              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
+                <Target className="text-slate-400 mr-3" />
+                <input
+                  type="text"
+                  value={formData.targetWeight}
+                  placeholder="範例: 55.50"
+                  onChange={(e) => handleDecimalInput(e.target.value, 'targetWeight')}
+                  className="w-full outline-none"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">預計每週減重 (kg/週)<span className="text-red-500">*</span></label>
+              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
+                <Weight className="text-slate-400 mr-3" />
+                <input
+                  type="text"
+                  value={formData.weeklyWeightLoss}
+                  placeholder="範例: 0.5"
+                  onChange={(e) => handleDecimalInput(e.target.value, 'weeklyWeightLoss')}
+                  className="w-full outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Display estimated days to reach target */}
+            {isStep2Valid && isStep4Valid && (
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                <p className="text-xs font-semibold text-slate-500 mb-2">預估達成時間</p>
+                <p className="text-2xl font-bold text-blue-700 mb-1">
+                  {calculateDaysToTarget()} 天
+                </p>
+                <p className="text-sm text-slate-600">
+                  從目前 {Number(formData.weight).toFixed(2)} kg 到目標 {Number(formData.targetWeight).toFixed(2)} kg
+                </p>
+                <p className="text-xs text-slate-500 mt-2">
+                  需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
+                  每週減 {Number(formData.weeklyWeightLoss).toFixed(2)} kg
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-6 flex space-x-4">
@@ -228,12 +350,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         <Button
           fullWidth
           className="flex-1"
+          disabled={
+            (step === 1 && !isStep1Valid) ||
+            (step === 2 && !isStep2Valid) ||
+            (step === 5 && !isStep4Valid)
+          }
           onClick={() => {
-            if (step < 4) setStep(step + 1);
+            if (step < 5) setStep(step + 1);
             else handleFinish();
           }}
         >
-          {step === 4 ? '建立計畫' : '下一步'}
+          {step === 5 ? '建立計畫' : '下一步'}
         </Button>
       </div>
     </div>

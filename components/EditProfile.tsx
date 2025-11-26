@@ -18,22 +18,54 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
     weight: user.weight,
     activityLevel: user.activityLevel,
     goal: user.goal,
+    targetWeight: user.targetWeight,
+    weeklyWeightLoss: user.weeklyWeightLoss,
   });
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Helper function to handle decimal input with max 2 decimal places
+  const handleDecimalInput = (value: string, field: string) => {
+    // Allow empty string
+    if (value === '') {
+      handleChange(field, '');
+      return;
+    }
+    
+    // Allow numbers with up to 2 decimal places
+    const regex = /^\d*\.?\d{0,2}$/;
+    if (regex.test(value)) {
+      handleChange(field, value);
+    }
+  };
+
   // Normalize numeric inputs for BMI display in EditProfile
   const heightNum = Number(formData.height);
   const weightNum = Number(formData.weight);
+  const targetWeightNum = Number(formData.targetWeight);
+  const weeklyWeightLossNum = Number(formData.weeklyWeightLoss);
+  
   const hasValidHeightWeight = Number.isFinite(heightNum) && Number.isFinite(weightNum) && heightNum > 0 && weightNum > 0;
   const bmiValue = hasValidHeightWeight ? calculateBMI(weightNum, heightNum) : null;
+
+  // Calculate days to reach target weight
+  const calculateDaysToTarget = () => {
+    if (!hasValidHeightWeight || !Number.isFinite(targetWeightNum) || !Number.isFinite(weeklyWeightLossNum) || 
+        targetWeightNum <= 0 || weeklyWeightLossNum <= 0) return 0;
+    const weightDiff = Math.abs(weightNum - targetWeightNum);
+    const weeks = weightDiff / weeklyWeightLossNum;
+    return Math.ceil(weeks * 7);
+  };
 
   const handleSave = () => {
     // Recalculate stats based on new input
     const weightVal = Number(formData.weight);
     const heightVal = Number(formData.height);
+    const targetWeightVal = Number(formData.targetWeight);
+    const weeklyWeightLossVal = Number(formData.weeklyWeightLoss);
+    
     const bmr = calculateBMR(user.gender, weightVal, heightVal, formData.age);
     const tdee = calculateTDEE(bmr, formData.activityLevel);
     const targetCalories = calculateTargetCalories(tdee, formData.goal);
@@ -41,9 +73,14 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
 
     const updatedProfile: UserProfile = {
       ...user,
-      ...formData,
+      name: formData.name,
+      age: formData.age,
       height: heightVal,
       weight: weightVal,
+      activityLevel: formData.activityLevel,
+      goal: formData.goal,
+      targetWeight: targetWeightVal,
+      weeklyWeightLoss: weeklyWeightLossVal,
       tdee,
       targetCalories,
       targetProtein: macros.protein,
@@ -68,34 +105,44 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
           <h3 className="font-bold text-slate-700">基本資料</h3>
           
           <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1">年齡</label>
+            <label className="block text-xs font-bold text-slate-400 mb-1">年齡<span className="text-red-500">*</span></label>
             <input
               type="number"
               value={formData.age}
-              onChange={(e) => handleChange('age', parseInt(e.target.value) || 0)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '' || (/^\d+$/.test(val) && parseInt(val) > 0)) {
+                  handleChange('age', parseInt(val) || '');
+                }
+              }}
               className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+              min="1"
+              step="1"
+              required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">身高 (cm)</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1">身高 (cm)<span className="text-red-500">*</span></label>
               <input
-                type="number"
+                type="text"
                 value={formData.height}
-                placeholder="範例: 165"
-                onChange={(e) => handleChange('height', e.target.value === '' ? '' : parseInt(e.target.value))}
+                placeholder="範例: 165.5"
+                onChange={(e) => handleDecimalInput(e.target.value, 'height')}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                required
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">體重 (kg)</label>
+              <label className="block text-xs font-bold text-slate-400 mb-1">體重 (kg)<span className="text-red-500">*</span></label>
               <input
-                type="number"
+                type="text"
                 value={formData.weight}
-                placeholder="範例: 60"
-                onChange={(e) => handleChange('weight', e.target.value === '' ? '' : parseInt(e.target.value))}
+                placeholder="範例: 60.45"
+                onChange={(e) => handleDecimalInput(e.target.value, 'weight')}
                 className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                required
               />
             </div>
           </div>
@@ -172,6 +219,54 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Target Weight and Weekly Weight Loss */}
+        <div className="bg-slate-50 p-4 rounded-xl space-y-4">
+          <h3 className="font-bold text-slate-700">減重計劃</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">目標體重 (kg)<span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                value={formData.targetWeight}
+                placeholder="範例: 55.50"
+                onChange={(e) => handleDecimalInput(e.target.value, 'targetWeight')}
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-1">每週減重 (kg)<span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                value={formData.weeklyWeightLoss}
+                placeholder="範例: 0.5"
+                onChange={(e) => handleDecimalInput(e.target.value, 'weeklyWeightLoss')}
+                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Display estimated days to reach target */}
+          {hasValidHeightWeight && Number.isFinite(targetWeightNum) && Number.isFinite(weeklyWeightLossNum) && 
+           targetWeightNum > 0 && weeklyWeightLossNum > 0 && (
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-3 rounded-lg">
+              <p className="text-xs font-semibold text-slate-600 mb-1">預估達成時間</p>
+              <p className="text-xl font-bold text-blue-700 mb-1">
+                {calculateDaysToTarget()} 天
+              </p>
+              <p className="text-xs text-slate-600">
+                從目前 {weightNum.toFixed(2)} kg 到目標 {targetWeightNum.toFixed(2)} kg
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
+                每週減 {weeklyWeightLossNum.toFixed(2)} kg
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
