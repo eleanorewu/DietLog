@@ -33,8 +33,10 @@ function App() {
     const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
     const savedWeightRecords = localStorage.getItem(STORAGE_KEY_WEIGHT_RECORDS);
 
+    let parsedUser = null;
+
     if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
+      parsedUser = JSON.parse(savedUser);
       
       // Migration: Add default values for new fields if they don't exist
       if (!parsedUser.targetWeight) {
