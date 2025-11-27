@@ -1,7 +1,7 @@
 {
-  "name": "NutriLog",
-  "short_name": "NutriLog",
-  "description": "智慧飲食紀錄",
+  "name": "DietLog",
+  "short_name": "DietLog",
+  "description": "輕鬆記錄每日飲食，管理健康生活。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
