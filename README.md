@@ -1,6 +1,6 @@
 # 飲食控制紀錄 PWA
 
-https://nutrilog-fawn.vercel.app
+http://dietlog-pwa.vercel.app
 
 ## Run Locally
 
