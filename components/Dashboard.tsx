@@ -8,7 +8,7 @@ import { SwipeableItem } from './SwipeableItem';
 interface DashboardProps {
   user: UserProfile;
   logs: FoodLog[];
-  onAddFood: () => void;
+  onAddFood: (mealType?: MealType) => void;
   onEditFood: (log: FoodLog) => void;
   onDeleteFood: (id: string) => void;
   selectedDate: string;
@@ -67,18 +67,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const valueColorClass = isOver ? 'text-red-500' : 'text-slate-700';
 
     return (
-      <div className="flex flex-col min-w-0">
-        <div className="text-sm text-slate-700">
+      <div className="flex flex-col items-center justify-center min-w-0">
+        <div className="text-sm text-slate-700 text-center">
           <div className="font-medium leading-tight break-words">{label}</div>
         </div>
 
-        <div className="mt-2">
+        <div className="mt-1.5">
           <div className={`text-sm font-bold tabular-nums whitespace-nowrap ${valueColorClass}`}>
             {current} / {target}g
           </div>
         </div>
 
-        <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div className="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${barColorClass}`}
             style={{ width: `${percent}%` }}
@@ -94,15 +94,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const isFutureDate_flag = isFutureDate(selectedDate);
 
     return (
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-3">
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
           <h3 className="font-bold text-slate-800">{title}</h3>
           <span className="text-xs font-medium text-slate-400">{cals} kcal</span>
         </div>
         {meals.length === 0 ? (
           <div 
-            onClick={!isFutureDate_flag ? onAddFood : undefined}
-            className={`border border-dashed border-slate-300 rounded-xl p-4 text-center text-sm ${
+            onClick={!isFutureDate_flag ? () => onAddFood(type) : undefined}
+            className={`border border-dashed border-slate-300 rounded-xl p-3 text-center text-sm ${
               isFutureDate_flag 
                 ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
                 : 'text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors'
@@ -111,7 +111,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             + 新增{title}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {meals.map((meal) => (
               <SwipeableItem 
                 key={meal.id}
@@ -120,13 +120,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
               >
                 <div 
                   onClick={() => !isFutureDate_flag && onEditFood(meal)}
-                  className={`bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center transition-transform group ${
+                  className={`bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center transition-transform group ${
                     isFutureDate_flag 
                       ? 'opacity-60 cursor-not-allowed' 
                       : 'active:scale-[0.98] cursor-pointer hover:bg-slate-50'
                   }`}
                 >
-                  <div className="w-12 h-12 rounded-lg bg-slate-100 mr-3 overflow-hidden flex-shrink-0">
+                  <div className="w-11 h-11 rounded-lg bg-slate-100 mr-2.5 overflow-hidden flex-shrink-0">
                     {meal.photoUrl ? (
                       <img src={meal.photoUrl} alt={meal.name} className="w-full h-full object-cover" />
                     ) : (
@@ -168,9 +168,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="pb-24 animate-fadeIn">
-      <div className="bg-white rounded-b-[2rem] shadow-sm mb-6 pb-6 pt-4 px-6 sticky top-0 z-10">
-        <div className="flex justify-between items-center mb-4">
+    <div className="pb-20 animate-fadeIn">
+      <div className="bg-white  mb-2 pb-2 pt-4 px-2 sticky top-0 z-10">
+        <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-xl text-slate-800">NutriLog</span>
           </div>
@@ -191,10 +191,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-between gap-1">
           <button 
             onClick={() => onDateChange(getPreviousWeekStart(weekStart))}
-            className="p-2 hover:bg-white rounded-lg transition-colors text-slate-600"
+            className="p-1.5 hover:bg-white rounded-lg transition-colors text-slate-600"
           >
             <ChevronLeft size={20} />
           </button>
@@ -221,7 +221,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                   }`}
                   disabled={isFuture}
-                  style={{ width: '36px', height: '56px' }}
+                  style={{ width: '34px', height: '52px' }}
                 >
                   <span className="text-slate-500 text-xs mb-1">{dayName}</span>
                   <span>{dayNum}</span>
@@ -232,7 +232,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button 
             onClick={() => onDateChange(getNextWeekStart(weekStart))}
-            className="p-2 hover:bg-white rounded-lg transition-colors text-slate-600"
+            className="p-1.5 hover:bg-white rounded-lg transition-colors text-slate-600"
           >
             <ChevronRight size={20} />
           </button>
@@ -240,8 +240,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {isFutureDate(selectedDate) ? (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-24">
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 text-center max-w-xs">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center max-w-xs">
             <Lock size={48} className="text-amber-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-slate-800 mb-2">未來日期無法新增紀錄</h2>
             <p className="text-sm text-slate-500">只能紀錄當日及過去的飲食</p>
@@ -249,25 +249,25 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       ) : (
         <>
-          <div className="bg-white mx-6 p-6 rounded-[2rem] shadow-sm mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white mx-4 p-2 mb-4">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold text-slate-800">今日攝取概況</h2>
             </div>
 
             {/* 每日目標與 TDEE 資訊 */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-slate-50 rounded-xl p-3">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-slate-50 rounded-xl p-2.5">
                 <p className="text-xs text-slate-500 font-medium mb-1">每日目標</p>
                 <p className="text-lg font-bold text-emerald-600">{user.targetCalories} kcal</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-3">
+              <div className="bg-slate-50 rounded-xl p-2.5">
                 <p className="text-xs text-slate-500 font-medium mb-1">每日總消耗 (TDEE)</p>
                 <p className="text-lg font-bold text-slate-700">{user.tdee} kcal</p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center relative mb-8">
-              <div className="w-48 h-48 relative">
+            <div className="flex flex-col items-center relative mb-6">
+              <div className="w-44 h-44 relative">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -303,7 +303,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <MacroBar
                 label="蛋白質"
                 current={totalProtein}
@@ -325,7 +325,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="px-6">
+          <div className="px-4">
             {renderMealSection('breakfast', '早餐')}
             {renderMealSection('lunch', '午餐')}
             {renderMealSection('dinner', '晚餐')}

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ActivityLevel, Gender, Goal, UserProfile } from '../types';
 import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
 import { Button } from './Button';
-import { Ruler, Weight, User, Activity, Target } from 'lucide-react';
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void;
@@ -10,6 +9,14 @@ interface OnboardingProps {
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
+  const [touched, setTouched] = useState({
+    name: false,
+    age: false,
+    height: false,
+    weight: false,
+    targetWeight: false,
+    weeklyWeightLoss: false,
+  });
   const [formData, setFormData] = useState({
     name: '',
     gender: 'female' as Gender,
@@ -25,6 +32,57 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleBlur = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  // Error messages
+  const getNameError = () => {
+    if (!touched.name) return '';
+    if (formData.name.trim() === '') return '請輸入名字';
+    return '';
+  };
+
+  const getAgeError = () => {
+    if (!touched.age) return '';
+    if (formData.age === '') return '請輸入年齡';
+    const ageNum = Number(formData.age);
+    if (!Number.isFinite(ageNum) || ageNum <= 0) return '請輸入有效的年齡';
+    return '';
+  };
+
+  const getHeightError = () => {
+    if (!touched.height) return '';
+    if (formData.height === '') return '請輸入身高';
+    const heightNum = Number(formData.height);
+    if (!Number.isFinite(heightNum) || heightNum <= 0) return '請輸入有效的身高（公分）';
+    return '';
+  };
+
+  const getWeightError = () => {
+    if (!touched.weight) return '';
+    if (formData.weight === '') return '請輸入體重';
+    const weightNum = Number(formData.weight);
+    if (!Number.isFinite(weightNum) || weightNum <= 0) return '請輸入有效的體重（公斤）';
+    return '';
+  };
+
+  const getTargetWeightError = () => {
+    if (!touched.targetWeight) return '';
+    if (formData.targetWeight === '') return '請輸入目標體重';
+    const targetWeightNum = Number(formData.targetWeight);
+    if (!Number.isFinite(targetWeightNum) || targetWeightNum <= 0) return '請輸入有效的目標體重（公斤）';
+    return '';
+  };
+
+  const getWeeklyWeightLossError = () => {
+    if (!touched.weeklyWeightLoss) return '';
+    if (formData.weeklyWeightLoss === '') return '請輸入預計每週減重';
+    const weeklyWeightLossNum = Number(formData.weeklyWeightLoss);
+    if (!Number.isFinite(weeklyWeightLossNum) || weeklyWeightLossNum <= 0) return '請輸入有效的每週減重數值（公斤）';
+    return '';
   };
 
   // Helper function to handle decimal input with max 2 decimal places
@@ -130,10 +188,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                className="w-full p-4 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                onBlur={() => handleBlur('name')}
+                className={`w-full px-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none ${
+                  getNameError() ? 'border-red-500' : 'border-slate-200'
+                }`}
                 placeholder="輸入名字"
                 required
               />
+              {getNameError() && (
+                <p className="text-red-500 text-xs mt-1">{getNameError()}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">性別</label>
@@ -142,7 +206,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={g}
                     onClick={() => handleChange('gender', g)}
-                    className={`p-4 rounded-xl border-2 font-medium ${
+                    className={`px-4 py-3 rounded-xl border-2 font-medium ${
                       formData.gender === g
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-slate-100 bg-white text-slate-500'
@@ -155,8 +219,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             </div>
              <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">年齡<span className="text-red-500">*</span></label>
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
-                <User className="text-slate-400 mr-3" />
+              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
+                getAgeError() ? 'border-red-500' : 'border-slate-200'
+              }`}>
                 <input
                   type="number"
                   value={formData.age}
@@ -166,6 +231,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                       handleChange('age', val);
                     }
                   }}
+                  onBlur={() => handleBlur('age')}
                   className="w-full outline-none"
                   placeholder="輸入年齡"
                   min="1"
@@ -173,6 +239,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   required
                 />
               </div>
+              {getAgeError() && (
+                <p className="text-red-500 text-xs mt-1">{getAgeError()}</p>
+              )}
             </div>
           </div>
         )}
@@ -181,31 +250,41 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           <div className="space-y-6 animate-fadeIn">
              <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">身高 (cm)<span className="text-red-500">*</span></label>
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
-                <Ruler className="text-slate-400 mr-3" />
+              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
+                getHeightError() ? 'border-red-500' : 'border-slate-200'
+              }`}>
                 <input
                   type="text"
                   value={formData.height}
                   placeholder="範例: 165.5"
                   onChange={(e) => handleDecimalInput(e.target.value, 'height')}
+                  onBlur={() => handleBlur('height')}
                   className="w-full outline-none"
                   required
                 />
               </div>
+              {getHeightError() && (
+                <p className="text-red-500 text-xs mt-1">{getHeightError()}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">體重 (kg)<span className="text-red-500">*</span></label>
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
-                <Weight className="text-slate-400 mr-3" />
+              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
+                getWeightError() ? 'border-red-500' : 'border-slate-200'
+              }`}>
                 <input
                   type="text"
                   value={formData.weight}
                   placeholder="範例: 60.45"
                   onChange={(e) => handleDecimalInput(e.target.value, 'weight')}
+                  onBlur={() => handleBlur('weight')}
                   className="w-full outline-none"
                   required
                 />
               </div>
+              {getWeightError() && (
+                <p className="text-red-500 text-xs mt-1">{getWeightError()}</p>
+              )}
             </div>
 
             {/* BMI Display with Progress Bar - left-aligned vertical layout */}
@@ -246,13 +325,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={opt.val}
                     onClick={() => handleChange('activityLevel', opt.val)}
-                    className={`w-full p-4 rounded-xl border-2 text-left font-medium flex items-center ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium ${
                       formData.activityLevel === opt.val
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-slate-100 bg-white text-slate-500'
                     }`}
                   >
-                    <Activity size={20} className="mr-3" />
                     {opt.label}
                   </button>
                 ))}
@@ -274,13 +352,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={opt.val}
                     onClick={() => handleChange('goal', opt.val)}
-                    className={`w-full p-4 rounded-xl border-2 text-left font-medium flex items-center ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium ${
                       formData.goal === opt.val
                         ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                         : 'border-slate-100 bg-white text-slate-500'
                     }`}
                   >
-                    <Target size={20} className="mr-3" />
                     {opt.label}
                   </button>
                 ))}
@@ -293,32 +370,42 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           <div className="space-y-6 animate-fadeIn">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">目標體重 (kg)<span className="text-red-500">*</span></label>
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
-                <Target className="text-slate-400 mr-3" />
+              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
+                getTargetWeightError() ? 'border-red-500' : 'border-slate-200'
+              }`}>
                 <input
                   type="text"
                   value={formData.targetWeight}
                   placeholder="範例: 55.50"
                   onChange={(e) => handleDecimalInput(e.target.value, 'targetWeight')}
+                  onBlur={() => handleBlur('targetWeight')}
                   className="w-full outline-none"
                   required
                 />
               </div>
+              {getTargetWeightError() && (
+                <p className="text-red-500 text-xs mt-1">{getTargetWeightError()}</p>
+              )}
             </div>
             
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">預計每週減重 (kg/週)<span className="text-red-500">*</span></label>
-              <div className="flex items-center bg-white border border-slate-200 rounded-xl p-3">
-                <Weight className="text-slate-400 mr-3" />
+              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
+                getWeeklyWeightLossError() ? 'border-red-500' : 'border-slate-200'
+              }`}>
                 <input
                   type="text"
                   value={formData.weeklyWeightLoss}
                   placeholder="範例: 0.5"
                   onChange={(e) => handleDecimalInput(e.target.value, 'weeklyWeightLoss')}
+                  onBlur={() => handleBlur('weeklyWeightLoss')}
                   className="w-full outline-none"
                   required
                 />
               </div>
+              {getWeeklyWeightLossError() && (
+                <p className="text-red-500 text-xs mt-1">{getWeeklyWeightLossError()}</p>
+              )}
             </div>
 
             {/* Display estimated days to reach target */}

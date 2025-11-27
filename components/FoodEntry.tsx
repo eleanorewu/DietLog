@@ -10,6 +10,7 @@ interface FoodEntryProps {
   onCancel: () => void;
   initialDate?: string;
   initialData?: FoodLog | null;
+  initialMealType?: MealType;
 }
 
 export const FoodEntry: React.FC<FoodEntryProps> = ({ 
@@ -17,13 +18,14 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   onDelete,
   onCancel, 
   initialDate,
-  initialData 
+  initialData,
+  initialMealType
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    mealType: 'breakfast' as MealType,
+    mealType: (initialMealType || 'breakfast') as MealType,
     calories: '' as string | number,
     protein: '' as string | number,
     fat: '' as string | number,
@@ -43,8 +45,14 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
       if (initialData.photoUrl) {
         setPhotoPreview(initialData.photoUrl);
       }
+    } else if (initialMealType) {
+      // If no initialData but has initialMealType, set the mealType
+      setFormData(prev => ({
+        ...prev,
+        mealType: initialMealType
+      }));
     }
-  }, [initialData]);
+  }, [initialData, initialMealType]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

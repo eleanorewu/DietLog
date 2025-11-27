@@ -25,6 +25,7 @@ function App() {
   // New States for Features
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
   const [editingLog, setEditingLog] = useState<FoodLog | null>(null);
+  const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
 
   // Load data on mount
   useEffect(() => {
@@ -122,8 +123,9 @@ function App() {
     }
   };
 
-  const handleOpenAddFood = () => {
+  const handleOpenAddFood = (mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
     setEditingLog(null);
+    setDefaultMealType(mealType);
     setView('food-entry');
   };
 
@@ -229,6 +231,7 @@ function App() {
               onCancel={() => setView('dashboard')} 
               initialData={editingLog}
               initialDate={selectedDate}
+              initialMealType={defaultMealType}
             />
           )}
 
