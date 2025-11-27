@@ -55,6 +55,15 @@ function App() {
 
     if (savedWeightRecords) {
       setWeightRecords(JSON.parse(savedWeightRecords));
+    } else if (parsedUser) {
+      // Migration: Create initial weight record for existing users
+      const initialRecord: WeightRecord = {
+        id: Date.now().toString(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        weight: parsedUser.weight,
+      };
+      setWeightRecords([initialRecord]);
     }
   }, []);
 

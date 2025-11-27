@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FoodLog, UserProfile, MealType } from '../types';
-import { Flame, Droplet, Wheat, Dumbbell, ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2 } from 'lucide-react';
+import { Flame, ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2 } from 'lucide-react';
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
 import { SwipeableItem } from './SwipeableItem';
 
@@ -55,13 +55,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
     current,
     target,
     color,
-    icon: Icon,
   }: {
     label: string;
     current: number;
     target: number;
     color: string;
-    icon: any;
   }) => {
     const percent = target > 0 ? Math.min((current / target) * 100, 100) : 0;
     const isOver = current > target && target > 0;
@@ -70,8 +68,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return (
       <div className="flex flex-col min-w-0">
-        <div className="flex items-center space-x-2 text-sm text-slate-700">
-          <Icon size={16} className="text-slate-400 flex-shrink-0" />
+        <div className="text-sm text-slate-700">
           <div className="font-medium leading-tight break-words">{label}</div>
         </div>
 
@@ -312,22 +309,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 current={totalProtein}
                 target={user.targetProtein}
                 color="bg-blue-500"
-                icon={Dumbbell}
-              />
+                />
               <MacroBar
                 label="碳水"
                 current={totalCarbs}
                 target={user.targetCarbs}
                 color="bg-orange-500"
-                icon={Wheat}
-              />
+                />
               <MacroBar
                 label="脂肪"
                 current={totalFat}
                 target={user.targetFat}
                 color="bg-yellow-500"
-                icon={Droplet}
-              />
+                />
             </div>
           </div>
 

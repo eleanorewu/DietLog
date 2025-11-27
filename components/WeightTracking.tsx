@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeightRecord, UserProfile } from '../types';
-import { Weight, Edit3 } from 'lucide-react';
+import { Edit3 } from 'lucide-react';
 
 interface WeightTrackingProps {
   user: UserProfile;
@@ -66,10 +66,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
       {/* Current Weight Card */}
       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Weight className="text-blue-600" size={20} />
-            <h3 className="font-bold text-slate-700">目前體重</h3>
-          </div>
+          <h3 className="font-bold text-slate-700">目前體重</h3>
           {!isEditingWeight && (
             <button 
               onClick={() => setIsEditingWeight(true)}
