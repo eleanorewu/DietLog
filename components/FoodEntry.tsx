@@ -3,6 +3,7 @@ import { FoodLog, MealType } from '../types';
 import { Button } from './Button';
 import { generateId, getTodayString, isFutureDate } from '../utils';
 import { Camera, ArrowLeft, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 
 interface FoodEntryProps {
   onSave: (log: FoodLog) => void;
@@ -23,6 +24,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     mealType: (initialMealType || 'breakfast') as MealType,
@@ -54,11 +56,43 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
     }
   }, [initialData, initialMealType]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const objectUrl = URL.createObjectURL(file);
-      setPhotoPreview(objectUrl);
+      
+      try {
+        setIsCompressing(true);
+        
+        // 壓縮設定
+        const options = {
+          maxSizeMB: 1,              // 最大檔案大小 1MB
+          maxWidthOrHeight: 1920,    // 最大寬度或高度
+          useWebWorker: true,        // 使用 Web Worker 提升效能
+          fileType: 'image/jpeg',    // 輸出格式
+        };
+        
+        // 壓縮圖片
+        const compressedFile = await imageCompression(file, options);
+        
+        // 將壓縮後的圖片轉為 base64 URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPhotoPreview(reader.result as string);
+          setIsCompressing(false);
+        };
+        reader.readAsDataURL(compressedFile);
+        
+        // 顯示壓縮效果
+        console.log(`原始大小: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+        console.log(`壓縮後大小: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+        
+      } catch (error) {
+        console.error('圖片壓縮失敗:', error);
+        // 壓縮失敗時使用原始圖片
+        const objectUrl = URL.createObjectURL(file);
+        setPhotoPreview(objectUrl);
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -131,9 +165,14 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
           className={`h-64 bg-slate-50 relative flex items-center justify-center border-b border-slate-100 group ${
             isFutureDate_flag ? 'cursor-not-allowed' : 'cursor-pointer'
           }`}
-          onClick={() => !isFutureDate_flag && fileInputRef.current?.click()}
+          onClick={() => !isFutureDate_flag && !isCompressing && fileInputRef.current?.click()}
         >
-          {photoPreview ? (
+          {isCompressing ? (
+            <div className="flex flex-col items-center text-emerald-500">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mb-3"></div>
+              <span className="font-medium">壓縮圖片中...</span>
+            </div>
+          ) : photoPreview ? (
             <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
           ) : (
             <div className="flex flex-col items-center text-slate-400 group-hover:text-emerald-500 transition-colors">
@@ -148,7 +187,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
             accept="image/*"
             onChange={handleFileChange} 
           />
-          {photoPreview && (
+          {photoPreview && !isCompressing && (
             <button 
               className="absolute bottom-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70"
               onClick={(e) => {
