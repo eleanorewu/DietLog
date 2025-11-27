@@ -172,7 +172,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="bg-white  mb-2 pb-2 pt-4 px-2 sticky top-0 z-10">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-slate-800">NutriLog</span>
+            <span className="font-bold text-xl text-slate-800">DietLog</span>
           </div>
           <div className="flex items-center gap-2">
             <button 

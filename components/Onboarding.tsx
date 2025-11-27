@@ -177,7 +177,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   return (
     <div className="flex flex-col h-full p-6 max-w-md mx-auto">
       <div className="flex-1 flex flex-col justify-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">歡迎使用 NutriLog</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">歡迎使用 DietLog</h1>
         <p className="text-slate-500 mb-8">讓我們為您建立個人化計畫。</p>
 
         {step === 1 && (

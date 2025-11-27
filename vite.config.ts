@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
           manifest: {
-            name: 'NutriLog',
-            short_name: 'NutriLog',
+            name: 'DietLog',
+            short_name: 'DietLog',
             description: '智慧飲食紀錄',
             theme_color: '#10b981',
             background_color: '#ffffff',

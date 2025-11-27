@@ -10,9 +10,9 @@ import { Trash2, LogOut, Plus } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 
 // Simple mock for local storage persistence
-const STORAGE_KEY_USER = 'nutrilog_user_v1';
-const STORAGE_KEY_LOGS = 'nutrilog_logs_v1';
-const STORAGE_KEY_WEIGHT_RECORDS = 'nutrilog_weight_records_v1';
+const STORAGE_KEY_USER = 'dietlog_user_v1';
+const STORAGE_KEY_LOGS = 'dietlog_logs_v1';
+const STORAGE_KEY_WEIGHT_RECORDS = 'dietlog_weight_records_v1';
 
 type View = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'edit-profile' | 'calendar';
 
@@ -311,7 +311,7 @@ function App() {
                     <Trash2 size={20} className="mr-2" />
                     重置所有資料
                   </button>
-                  <p className="text-center text-xs text-slate-400 mt-4 pb-4">NutriLog v1.2</p>
+                  <p className="text-center text-xs text-slate-400 mt-4 pb-4">DietLog v1.2</p>
                 </div>
              </div>
           )}
