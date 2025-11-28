@@ -3,7 +3,7 @@ import { Onboarding } from './components/Onboarding';
 import { Dashboard } from './components/Dashboard';
 import { FoodEntry } from './components/FoodEntry';
 import { EditProfile } from './components/EditProfile';
-import { CalendarView } from './components/CalendarView';
+import { MonthCalendarView } from './components/MonthCalendarView';
 import { WeightTracking } from './components/WeightTracking';
 import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, Plus } from 'lucide-react';
@@ -246,7 +246,7 @@ function App() {
           )}
 
           {view === 'calendar' && (
-            <CalendarView
+            <MonthCalendarView
               logs={logs}
               selectedDate={selectedDate}
               onDateSelect={(date) => {
@@ -263,7 +263,7 @@ function App() {
                    <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
                       <LogOut className="rotate-180" size={24}/>
                    </button>
-                   <h1 className="text-2xl font-bold ml-2">設定</h1>
+                   <h1 className="text-xl font-bold ml-2">設定</h1>
                 </div>
 
                 <div className="space-y-4">

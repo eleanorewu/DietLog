@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FoodLog, MealType } from '../types';
 import { Button } from './Button';
 import { generateId, getTodayString, isFutureDate } from '../utils';
-import { Camera, ArrowLeft, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
+import { LogOut, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 
 interface FoodEntryProps {
@@ -25,6 +25,12 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    calories?: string;
+    protein?: string;
+    carbs?: string;
+    fat?: string;
+  }>({});
   const [formData, setFormData] = useState({
     name: '',
     mealType: (initialMealType || 'breakfast') as MealType,
@@ -82,10 +88,6 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
         };
         reader.readAsDataURL(compressedFile);
         
-        // 顯示壓縮效果
-        console.log(`原始大小: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
-        console.log(`壓縮後大小: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
-        
       } catch (error) {
         console.error('圖片壓縮失敗:', error);
         // 壓縮失敗時使用原始圖片
@@ -97,7 +99,24 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   };
 
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    // 如果是數字欄位，只允許數字和空字串
+    if (['calories', 'protein', 'carbs', 'fat'].includes(field)) {
+      // 允許空字串、數字、或以數字開頭的字串
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+        // 清除該欄位的錯誤訊息
+        setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+      } else {
+        // 顯示該欄位的錯誤訊息
+        setFieldErrors((prev) => ({ ...prev, [field]: '請輸入有效的數字' }));
+        // 3秒後自動清除錯誤訊息
+        setTimeout(() => {
+          setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+        }, 3000);
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleSubmit = () => {
@@ -145,12 +164,12 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
       )}
 
       {/* Top Bar */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-100">
+      <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-50">
-            <ArrowLeft />
+          <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
+            <LogOut className="rotate-180" size={24} />
           </button>
-          <h1 className="text-lg font-bold ml-2">{initialData ? '編輯紀錄' : '新增飲食'}</h1>
+          <h1 className="text-xl font-bold ml-2">{initialData ? '編輯紀錄' : '新增飲食'}</h1>
         </div>
         {initialData && !isFutureDate_flag && (
           <button onClick={handleDelete} className="p-2 text-red-500 rounded-full hover:bg-red-50">
@@ -244,43 +263,59 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
               <div className="col-span-1">
                 <label className="text-xs text-slate-500 mb-2 block">熱量 (kcal)</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   placeholder="0"
                   value={formData.calories}
                   onChange={(e) => handleChange('calories', e.target.value)}
-                  className="w-full p-4 bg-slate-50 rounded-xl text-2xl font-bold text-emerald-600 outline-none border border-transparent focus:border-emerald-500 focus:bg-white transition-all"
+                  className="w-full p-4 bg-slate-50 rounded-xl text-2xl font-bold text-emerald-600 outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
                 />
+                {fieldErrors.calories && (
+                  <p className="text-red-500 text-xs mt-1">{fieldErrors.calories}</p>
+                )}
               </div>
               <div className="space-y-3">
                  <div className="flex flex-col min-w-0">
                     <label className="text-xs text-slate-500 font-medium mb-1">蛋白質 (g)</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       placeholder="0"
                       value={formData.protein}
                       onChange={(e) => handleChange('protein', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none focus:ring-1 focus:ring-emerald-500 transition-shadow"
+                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
                     />
+                    {fieldErrors.protein && (
+                      <p className="text-red-500 text-xs mt-1">{fieldErrors.protein}</p>
+                    )}
                  </div>
                  <div className="flex flex-col min-w-0">
                     <label className="text-xs text-slate-500 font-medium mb-1">碳水 (g)</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       placeholder="0"
                       value={formData.carbs}
                       onChange={(e) => handleChange('carbs', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none focus:ring-1 focus:ring-orange-500 transition-shadow"
+                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
                     />
+                    {fieldErrors.carbs && (
+                      <p className="text-red-500 text-xs mt-1">{fieldErrors.carbs}</p>
+                    )}
                  </div>
                  <div className="flex flex-col min-w-0">
                     <label className="text-xs text-slate-500 font-medium mb-1">脂肪 (g)</label>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       placeholder="0"
                       value={formData.fat}
                       onChange={(e) => handleChange('fat', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none focus:ring-1 focus:ring-yellow-500 transition-shadow"
+                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
                     />
+                    {fieldErrors.fat && (
+                      <p className="text-red-500 text-xs mt-1">{fieldErrors.fat}</p>
+                    )}
                  </div>
               </div>
             </div>

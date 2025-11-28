@@ -74,11 +74,14 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
     }, 200);
   };
 
-  const handleClick = () => {
-    // 如果已經滑出，點擊收回
+  const handleClick = (e: React.MouseEvent) => {
+    // 如果已經滑出，攔截點擊並收回
     if (translateX !== 0) {
+      e.stopPropagation();
+      e.preventDefault();
       setTranslateX(0);
     }
+    // 否則不攔截，讓點擊事件正常傳遞給 children
   };
 
   return (

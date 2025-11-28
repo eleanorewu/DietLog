@@ -3,14 +3,14 @@ import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
 import { getTodayString, isFutureDate, isToday } from '../utils';
 import { FoodLog } from '../types';
 
-interface CalendarViewProps {
+interface MonthCalendarViewProps {
   logs: FoodLog[];
   selectedDate: string;
   onDateSelect: (date: string) => void;
   onClose: () => void;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({
+export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
   logs,
   selectedDate,
   onDateSelect,
@@ -48,8 +48,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return `${year}-${month}-${dayStr}`;
   };
 
-  // 月份文字
-  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
   const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
   // 檢查該月是否有任何紀錄
@@ -61,21 +59,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   return (
     <div className="flex flex-col h-full bg-white animate-slideIn">
       {/* Header */}
-      <div className="flex items-center p-4 border-b border-slate-100">
+      <div className="flex items-center p-4">
         <button 
           onClick={onClose}
-          className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-50 transition-colors"
+          className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
         >
-          <LogOut className="rotate-180" size={20} />
+          <LogOut className="rotate-180" size={24} />
         </button>
-        <h1 className="text-lg font-bold ml-2">日曆</h1>
+        <h1 className="text-xl font-bold ml-2">日曆</h1>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-6">
         {/* Month Title */}
         <h2 className="text-2xl font-bold text-slate-800 text-center mb-4">
-          {currentMonth.getFullYear()}年 {monthNames[currentMonth.getMonth()]}
+          {currentMonth.getMonth() + 1}月 {currentMonth.getFullYear()}
         </h2>
 
         {/* Legend - Only show if month has records */}

@@ -92,11 +92,11 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
 
   return (
     <div className="flex flex-col h-full bg-white animate-slideIn">
-      <div className="flex items-center p-4 border-b border-slate-100">
-        <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-50">
-          <LogOut className="rotate-180" size={20}/>
+      <div className="flex items-center p-4">
+        <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
+          <LogOut className="rotate-180" size={24}/>
         </button>
-        <h1 className="text-lg font-bold ml-2">編輯個人檔案</h1>
+        <h1 className="text-xl font-bold ml-2">編輯個人檔案</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">

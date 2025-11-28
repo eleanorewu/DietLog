@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FoodLog, UserProfile, MealType } from '../types';
-import { Flame, ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2, Image } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2, Image } from 'lucide-react';
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
 import { SwipeableItem } from './SwipeableItem';
 
@@ -28,9 +28,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSettings,
   onOpenCalendar
 }) => {
-  // 計算當週起始日期
-  const weekStart = getWeekStart(selectedDate);
-  const weekDays = getWeekDays(weekStart);
+  // 獨立管理顯示的週次（不影響選擇的日期）
+  const [displayWeekStart, setDisplayWeekStart] = React.useState(() => getWeekStart(selectedDate));
+  
+  // 當 selectedDate 改變時，更新顯示的週次以包含該日期
+  React.useEffect(() => {
+    const selectedWeekStart = getWeekStart(selectedDate);
+    setDisplayWeekStart(selectedWeekStart);
+  }, [selectedDate]);
+  
+  const weekDays = getWeekDays(displayWeekStart);
   
   // 檢查當週是否包含未來日期
   const hasAnyFutureDate = weekDays.some(date => isFutureDate(date));
@@ -67,25 +74,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const percent = target > 0 ? Math.min((current / target) * 100, 100) : 0;
     const isOver = current > target && target > 0;
     const barColorClass = isOver ? 'bg-red-500' : color;
-    const valueColorClass = isOver ? 'text-red-500' : 'text-slate-700';
+    const valueColorClass = isOver ? 'text-red-500' : 'text-slate-500';
 
     return (
       <div className="flex flex-col items-center justify-center min-w-0">
-        <div className="text-sm text-slate-700 text-center">
-          <div className="font-medium leading-tight break-words">{label}</div>
+        <div className="text-xs text-slate-500 font-medium text-center mb-2">
+          <div className="leading-tight break-words">{label}</div>
         </div>
 
-        <div className="mt-1.5">
-          <div className={`text-sm font-bold tabular-nums whitespace-nowrap ${valueColorClass}`}>
-            {current} / {target}g
-          </div>
-        </div>
-
-        <div className="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
           <div
             className={`h-full rounded-full transition-all duration-300 ${barColorClass}`}
             style={{ width: `${percent}%` }}
           />
+        </div>
+
+        <div className="flex items-center gap-1">
+          {isOver && (
+            <AlertCircle size={14} className="text-red-500 flex-shrink-0" />
+          )}
+          <div className={`text-xs font-medium tabular-nums whitespace-nowrap ${valueColorClass}`}>
+            {current} / {target}g
+          </div>
         </div>
       </div>
     );
@@ -100,7 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-bold text-slate-800">{title}</h3>
-          <span className="text-xs font-medium text-slate-400">{cals} kcal</span>
+          <span className="text-xs font-bold text-emerald-600">{cals} kcal</span>
         </div>
         <div className="space-y-2">
           {meals.map((meal) => (
@@ -128,11 +138,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-slate-800 text-sm">{meal.name}</h4>
-                  <p className="text-xs text-slate-500">
-                    蛋:{meal.protein} 碳:{meal.carbs} 脂:{meal.fat}
+                  <p className="text-xs text-slate-500 flex items-center gap-2">
+                    <span>{meal.calories} kcal</span>
+                    <span className="text-slate-300">|</span>
+                    <span>蛋:{meal.protein}g</span>
+                    <span className="text-slate-300">|</span>
+                    <span>碳:{meal.carbs}g</span>
+                    <span className="text-slate-300">|</span>
+                    <span>脂:{meal.fat}g</span>
                   </p>
                 </div>
-                <div className="text-emerald-600 font-bold text-sm mr-2">{meal.calories}</div>
                 
                 {/* 桌面版刪除按鈕 - 懸停時顯示 */}
                 {!isFutureDate_flag && (
@@ -174,7 +189,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex justify-between items-center mb-3 mx-2 ">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-xl text-slate-800">
-              {selectedDate.split('-')[1]}月 {selectedDate.split('-')[0]}
+              {selectedDate.split('-')[0]}年{selectedDate.split('-')[1]}月{selectedDate.split('-')[2]}日
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -196,7 +211,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className="flex items-center justify-between gap-1">
           <button 
-            onClick={() => onDateChange(getPreviousWeekStart(weekStart))}
+            onClick={() => setDisplayWeekStart(getPreviousWeekStart(displayWeekStart))}
             className="p-1.5 hover:bg-white rounded-lg transition-colors text-slate-600 flex-shrink-0"
           >
             <ChevronLeft size={20} />
@@ -238,7 +253,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <button 
-            onClick={() => onDateChange(getNextWeekStart(weekStart))}
+            onClick={() => setDisplayWeekStart(getNextWeekStart(displayWeekStart))}
             disabled={hasAnyFutureDate}
             className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
               hasAnyFutureDate 
@@ -267,14 +282,21 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* 每日目標與 TDEE 資訊 */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-slate-50 rounded-xl p-2.5">
-                <p className="text-xs text-slate-500 font-medium mb-1">每日目標</p>
-                <p className="text-lg font-bold text-emerald-600">{user.targetCalories} kcal</p>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
+                <p className="text-xs text-slate-500 font-medium mb-1">已攝取</p>
+                <p className="text-lg font-bold text-emerald-600">{totalCalories}</p>
+                <p className="text-xs text-slate-500 font-medium">kcal</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-2.5">
-                <p className="text-xs text-slate-500 font-medium mb-1">每日總消耗 (TDEE)</p>
-                <p className="text-lg font-bold text-slate-700">{user.tdee} kcal</p>
+              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
+                <p className="text-xs text-slate-500 font-medium mb-1">每日目標</p>
+                <p className="text-lg font-bold text-slate-700">{user.targetCalories}</p>
+                <p className="text-xs text-slate-500 font-medium">kcal</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
+                <p className="text-xs text-slate-500 font-medium mb-1">TDEE</p>
+                <p className="text-lg font-bold text-slate-700">{user.tdee}</p>
+                <p className="text-xs text-slate-500 font-medium">kcal</p>
               </div>
             </div>
 
@@ -292,6 +314,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       endAngle={-270}
                       dataKey="value"
                       stroke="none"
+                      isAnimationActive={false}
+                      activeIndex={-1}
+                      activeShape={undefined}
                     >
                       {data.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -300,14 +325,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="flex items-center justify-center">
-                    <span className={`text-3xl font-bold ${isOver ? 'text-red-500' : 'text-emerald-500'}`}>
-                      {Math.abs(remaining)}
-                    </span>
-                    {isOver && (
-                      <AlertCircle size={24} className="text-red-500 ml-1" />
-                    )}
-                  </div>
+                  <span className={`text-3xl font-bold ${isOver ? 'text-red-500' : 'text-emerald-500'}`}>
+                    {Math.abs(remaining)}
+                  </span>
                   <span className="text-xs text-slate-400 uppercase font-bold tracking-wide">
                     {isOver ? '超標' : '剩餘'}
                   </span>
@@ -326,7 +346,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 label="碳水"
                 current={totalCarbs}
                 target={user.targetCarbs}
-                color="bg-orange-500"
+                color="bg-pink-400"
                 />
               <MacroBar
                 label="脂肪"
