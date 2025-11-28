@@ -170,11 +170,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <div className="pb-20 animate-fadeIn">
       <div className="bg-white  mb-2 pb-2 pt-4 px-2 sticky top-0 z-10">
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-3 mx-2 ">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-xl text-slate-800">DietLog</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button 
               onClick={onOpenCalendar}
               className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
@@ -223,7 +223,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   disabled={isFuture}
                   style={{ width: '34px', height: '52px' }}
                 >
-                  <span className="text-slate-500 text-xs mb-1">{dayName}</span>
+                  <span className="text-xs mb-1">{dayName}</span>
                   <span>{dayNum}</span>
                 </button>
               );
@@ -241,7 +241,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {isFutureDate(selectedDate) ? (
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 text-center max-w-xs">
+          <div className="bg-white p-6 text-center max-w-xs">
             <Lock size={48} className="text-amber-600 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-slate-800 mb-2">未來日期無法新增紀錄</h2>
             <p className="text-sm text-slate-500">只能紀錄當日及過去的飲食</p>
