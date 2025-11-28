@@ -199,7 +199,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <ChevronLeft size={20} />
           </button>
 
-          <div className="flex justify-center gap-1">
+          <div className="flex justify-between gap-1">
             {weekDays.map((date) => {
               const isSelected = date === selectedDate;
               const isFuture = isFutureDate(date);
@@ -221,9 +221,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                   }`}
                   disabled={isFuture}
-                  style={{ width: '34px', height: '52px' }}
+                  style={{ width: '38px', height: '52px' }}
                 >
-                  <span className="text-xs mb-1">{dayName}</span>
+                  <span className="text-xs mb-0.5">{dayName}</span>
                   <span>{dayNum}</span>
                 </button>
               );
