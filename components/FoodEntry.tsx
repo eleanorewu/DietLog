@@ -176,8 +176,8 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
             <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
           ) : (
             <div className="flex flex-col items-center text-slate-400 group-hover:text-emerald-500 transition-colors">
-              <Camera size={48} className="mb-2" />
-              <span className="font-medium">點擊拍攝照片</span>
+              <ImageIcon size={48} className="mb-2" />
+              <span className="font-medium">上傳圖片</span>
             </div>
           )}
           <input 

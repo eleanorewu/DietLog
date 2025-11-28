@@ -145,16 +145,18 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
         {/* Legend */}
         <div className="border-t border-slate-200 pt-4 space-y-2 text-xs text-slate-600">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-emerald-500" />
-            <span>已選擇日期</span>
+            <div className="w-4 h-4 rounded-lg bg-emerald-500 flex-shrink-0" />
+            <span>已選</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-slate-300" />
-            <span>有飲食紀錄</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-slate-100 border border-emerald-500" />
+            <div className="w-4 h-4 rounded-lg bg-slate-50 border-2 border-emerald-500 flex-shrink-0" />
             <span>今天</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0 relative">
+              <div className="absolute bottom-0.5 w-1 h-1 rounded-full bg-slate-500" />
+            </div>
+            <span>有紀錄</span>
           </div>
         </div>
       </div>
