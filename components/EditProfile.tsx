@@ -183,13 +183,12 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <button
                 key={opt.val}
                 onClick={() => handleChange('activityLevel', opt.val)}
-                className={`w-full p-3 rounded-lg border text-left text-sm font-medium flex items-center transition-colors ${
+                className={`w-full p-3 rounded-lg border text-left text-sm font-medium transition-colors ${
                   formData.activityLevel === opt.val
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                     : 'border-slate-200 bg-white text-slate-500'
                 }`}
               >
-                <Activity size={16} className="mr-2" />
                 {opt.label}
               </button>
             ))}
@@ -208,13 +207,12 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <button
                 key={opt.val}
                 onClick={() => handleChange('goal', opt.val)}
-                className={`w-full p-3 rounded-lg border text-left text-sm font-medium flex items-center transition-colors ${
+                className={`w-full p-3 rounded-lg border text-left text-sm font-medium transition-colors ${
                   formData.goal === opt.val
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                     : 'border-slate-200 bg-white text-slate-500'
                 }`}
               >
-                <Target size={16} className="mr-2" />
                 {opt.label}
               </button>
             ))}
