@@ -39,8 +39,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   
   const weekDays = getWeekDays(displayWeekStart);
   
-  // 檢查當週是否包含未來日期
-  const hasAnyFutureDate = weekDays.some(date => isFutureDate(date));
+  // 檢查下一週的開始日期是否為未來日期
+  const nextWeekStart = getNextWeekStart(displayWeekStart);
+  const isNextWeekDisabled = isFutureDate(nextWeekStart);
   
   // Filter logs by the selected date
   const todaysLogs = logs.filter((log) => log.date === selectedDate);
@@ -254,9 +255,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <button 
             onClick={() => setDisplayWeekStart(getNextWeekStart(displayWeekStart))}
-            disabled={hasAnyFutureDate}
+            disabled={isNextWeekDisabled}
             className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
-              hasAnyFutureDate 
+              isNextWeekDisabled 
                 ? 'text-slate-300 cursor-not-allowed' 
                 : 'text-slate-600 hover:bg-white'
             }`}
