@@ -6,7 +6,7 @@ import { EditProfile } from './components/EditProfile';
 import { MonthCalendarView } from './components/MonthCalendarView';
 import { WeightTracking } from './components/WeightTracking';
 import { FoodLog, UserProfile, WeightRecord } from './types';
-import { Trash2, LogOut, Plus } from 'lucide-react';
+import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 
 // Simple mock for local storage persistence
@@ -276,32 +276,32 @@ function App() {
 
                   {/* Profile Section */}
                   <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                    <div className="flex justify-between items-center mb-4 border-b border-slate-50 pb-2">
-                       <h3 className="text-sm font-bold text-slate-400 uppercase">我的個人檔案</h3>
+                    <div className="flex justify-between items-center mb-4">
+                       <h3 className="text-base font-bold text-slate-700">我的個人檔案</h3>
                        <button 
                          onClick={() => setView('edit-profile')}
-                         className="text-sm text-emerald-600 font-bold hover:underline"
+                         className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                        >
-                         編輯
+                         <SquarePen className="text-slate-600" size={16} />
                        </button>
                     </div>
                     
                     <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">每日目標</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">每日目標</span>
                         <span className="font-bold text-emerald-600">{user.targetCalories} kcal</span>
                       </div>
-                       <div className="flex justify-between">
-                        <span className="text-slate-600">每日總消耗 (TDEE)</span>
-                        <span className="font-bold">{user.tdee} kcal</span>
+                       <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">每日總消耗 (TDEE)</span>
+                        <span className="font-bold text-slate-900">{user.tdee} kcal</span>
                       </div>
-                      <div className="flex justify-between">
-                         <span className="text-slate-600">身高</span>
-                         <span className="font-bold">{user.height} cm</span>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">身高</span>
+                         <span className="font-bold text-slate-900">{user.height} cm</span>
                       </div>
-                       <div className="flex justify-between">
-                         <span className="text-slate-600">年齡</span>
-                         <span className="font-bold">{user.age} 歲</span>
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">年齡</span>
+                         <span className="font-bold text-slate-900">{user.age} 歲</span>
                       </div>
                     </div>
                   </div>
@@ -318,17 +318,6 @@ function App() {
              </div>
           )}
         </div>
-
-        {/* Floating Add Record button (inside the mobile container) */}
-        {view === 'dashboard' && (
-          <button
-            onClick={handleOpenAddFood}
-            aria-label="新增紀錄"
-            className="absolute bottom-4 right-4 z-20 p-4 bg-emerald-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-          >
-            <Plus size={20} />
-          </button>
-        )}
 
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeightRecord, UserProfile } from '../types';
-import { Edit3 } from 'lucide-react';
+import { SquarePen } from 'lucide-react';
 
 interface WeightTrackingProps {
   user: UserProfile;
@@ -65,14 +65,14 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
     <div className="space-y-4">
       {/* Current Weight Card */}
       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-slate-700">目前體重</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-bold text-slate-700">目前體重</h3>
           {!isEditingWeight && (
             <button 
               onClick={() => setIsEditingWeight(true)}
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <Edit3 className="text-blue-600" size={16} />
+              <SquarePen className="text-slate-600" size={16} />
             </button>
           )}
         </div>
@@ -88,7 +88,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                   if (e.key === 'Enter') handleSaveWeight();
                   if (e.key === 'Escape') handleCancelWeightEdit();
                 }}
-                className="flex-1 bg-white border-2 border-blue-400 rounded-lg p-2 text-lg font-bold text-slate-700 outline-none"
+                className="flex-1 bg-white border-2 border-green-400 rounded-lg p-2 text-lg font-bold text-slate-700 outline-none"
                 placeholder="輸入體重"
                 autoFocus
               />
@@ -97,7 +97,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={handleSaveWeight}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700 transition-colors"
               >
                 儲存並更新
               </button>
@@ -112,32 +112,32 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
         ) : (
           <div>
             <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-4xl font-bold text-blue-700">
+              <span className="text-4xl font-bold text-green-700">
                 {user.weight.toFixed(2)}
               </span>
               <span className="text-lg font-medium text-slate-600">kg</span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-xs text-slate-500">目標體重</p>
-                <p className="font-bold text-slate-700">{user.targetWeight.toFixed(2)} kg</p>
+                <p className="text-xs text-slate-500 mb-1">目標體重</p>
+                <p className="font-bold text-slate-900">{user.targetWeight.toFixed(2)} kg</p>
               </div>
               <div className="bg-slate-50 rounded-lg p-2">
-                <p className="text-xs text-slate-500">每週減重</p>
-                <p className="font-bold text-slate-700">{user.weeklyWeightLoss.toFixed(2)} kg</p>
+                <p className="text-xs text-slate-500 mb-1">每週減重</p>
+                <p className="font-bold text-slate-900">{user.weeklyWeightLoss.toFixed(2)} kg</p>
               </div>
             </div>
             
             <div className="mt-3 pt-3 border-t border-slate-100">
               {weightProgress > 0 ? (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">還需減重</span>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">還需減重</span>
                     <span className="font-bold text-orange-600">{totalWeightToLose.toFixed(2)} kg</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">預估達成時間</span>
-                    <span className="font-bold text-blue-600">約 {estimatedDays} 天</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">預估達成時間</span>
+                    <span className="font-bold text-green-600">約 {estimatedDays} 天</span>
                   </div>
                 </div>
               ) : weightProgress < 0 ? (
@@ -157,7 +157,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
       {/* Weight Trend Chart */}
       {chartData.length > 0 && (
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <h3 className="font-bold text-slate-700 mb-4">體重趨勢</h3>
+          <h3 className="text-base font-bold text-slate-700 mb-4">體重趨勢</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -191,9 +191,9 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                 <Line 
                   type="monotone" 
                   dataKey="weight" 
-                  stroke="#3b82f6" 
+                  stroke="#10b981" 
                   strokeWidth={2}
-                  dot={{ fill: '#3b82f6', r: 4 }}
+                  dot={{ fill: '#10b981', r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>
@@ -204,7 +204,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
 
       {/* Weight Records History */}
       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-        <h3 className="font-bold text-slate-700 mb-3">體重歷史記錄</h3>
+        <h3 className="text-base font-bold text-slate-700 mb-4">體重歷史記錄</h3>
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {weightRecords
             .sort((a, b) => b.timestamp - a.timestamp)
@@ -215,7 +215,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
               >
                 <div className="flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-slate-700">
+                    <span className="text-base font-bold text-slate-900">
                       {record.weight.toFixed(2)} kg
                     </span>
                     <span className="text-xs text-slate-500">

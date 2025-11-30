@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ActivityLevel, Goal, UserProfile } from '../types';
 import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
 import { Button } from './Button';
-import { User, Activity, Target, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 interface EditProfileProps {
   user: UserProfile;
