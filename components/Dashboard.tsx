@@ -4,6 +4,7 @@ import { FoodLog, UserProfile, MealType } from '../types';
 import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2, Image } from 'lucide-react';
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
 import { SwipeableItem } from './SwipeableItem';
+import { Dialog } from './Dialog';
 
 interface DashboardProps {
   user: UserProfile;
@@ -28,6 +29,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSettings,
   onOpenCalendar
 }) => {
+  // Dialog 狀態管理
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [foodToDelete, setFoodToDelete] = React.useState<string | null>(null);
+  
   // 獨立管理顯示的週次（不影響選擇的日期）
   const [displayWeekStart, setDisplayWeekStart] = React.useState(() => getWeekStart(selectedDate));
   
@@ -155,9 +160,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm('確定要刪除這筆記錄嗎？')) {
-                        onDeleteFood(meal.id);
-                      }
+                      setFoodToDelete(meal.id);
+                      setDeleteDialogOpen(true);
                     }}
                     className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-lg"
                     title="刪除記錄"
@@ -363,9 +367,29 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {renderMealSection('lunch', '午餐')}
             {renderMealSection('dinner', '晚餐')}
             {renderMealSection('snack', '點心')}
-          </div>
-        </>
+        </div>
+      </>
       )}
+      
+      {/* 刪除確認 Dialog */}
+      <Dialog
+        isOpen={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setFoodToDelete(null);
+        }}
+        onConfirm={() => {
+          if (foodToDelete) {
+            onDeleteFood(foodToDelete);
+            setFoodToDelete(null);
+          }
+        }}
+        title="刪除飲食紀錄"
+        message="確定要刪除這筆記錄嗎？此操作無法復原。"
+        confirmText="刪除"
+        cancelText="取消"
+        isDangerous={true}
+      />
     </div>
   );
 };

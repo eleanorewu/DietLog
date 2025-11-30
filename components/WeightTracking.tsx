@@ -50,7 +50,6 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   const estimatedWeeks = user.weeklyWeightLoss > 0 
     ? Math.ceil(totalWeightToLose / user.weeklyWeightLoss) 
     : 0;
-  const estimatedDays = estimatedWeeks * 7;
 
   // Prepare data for chart
   const chartData = weightRecords
@@ -137,7 +136,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600">預估達成時間</span>
-                    <span className="font-bold text-green-600">約 {estimatedDays} 天</span>
+                    <span className="font-bold text-green-600">約 {estimatedWeeks} 週</span>
                   </div>
                 </div>
               ) : weightProgress < 0 ? (

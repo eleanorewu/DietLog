@@ -8,6 +8,7 @@ import { WeightTracking } from './components/WeightTracking';
 import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
+import { Dialog } from './components/Dialog';
 
 // Simple mock for local storage persistence
 const STORAGE_KEY_USER = 'dietlog_user_v1';
@@ -21,6 +22,7 @@ function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [logs, setLogs] = useState<FoodLog[]>([]);
   const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   
   // New States for Features
   const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
@@ -90,14 +92,16 @@ function App() {
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUser(profile);
     
-    // Create initial weight record
-    const initialRecord: WeightRecord = {
-      id: Date.now().toString(),
-      date: getTodayString(),
-      timestamp: Date.now(),
-      weight: profile.weight,
-    };
-    setWeightRecords([initialRecord]);
+    // Create initial weight record only if no records exist
+    if (weightRecords.length === 0) {
+      const initialRecord: WeightRecord = {
+        id: Date.now().toString(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        weight: profile.weight,
+      };
+      setWeightRecords([initialRecord]);
+    }
     
     setView('dashboard');
   };
@@ -183,17 +187,19 @@ function App() {
   };
 
   const handleReset = () => {
-    if (confirm("您確定要刪除所有資料並重置嗎？")) {
-        localStorage.removeItem(STORAGE_KEY_USER);
-        localStorage.removeItem(STORAGE_KEY_LOGS);
-        localStorage.removeItem(STORAGE_KEY_WEIGHT_RECORDS);
-        setUser(null);
-        setLogs([]);
-        setWeightRecords([]);
-        setEditingLog(null);
-        setSelectedDate(getTodayString());
-        setView('onboarding');
-    }
+    setResetDialogOpen(true);
+  };
+  
+  const confirmReset = () => {
+    localStorage.removeItem(STORAGE_KEY_USER);
+    localStorage.removeItem(STORAGE_KEY_LOGS);
+    localStorage.removeItem(STORAGE_KEY_WEIGHT_RECORDS);
+    setUser(null);
+    setLogs([]);
+    setWeightRecords([]);
+    setEditingLog(null);
+    setSelectedDate(getTodayString());
+    setView('onboarding');
   };
 
   return (
@@ -320,6 +326,18 @@ function App() {
         </div>
 
       </div>
+      
+      {/* 重置確認 Dialog */}
+      <Dialog
+        isOpen={resetDialogOpen}
+        onClose={() => setResetDialogOpen(false)}
+        onConfirm={confirmReset}
+        title="重置所有資料"
+        message="您確定要刪除所有資料並重置嗎？這將清除您的個人資料、飲食記錄和體重記錄，此操作無法復原。"
+        confirmText="確定重置"
+        cancelText="取消"
+        isDangerous={true}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
-import { getTodayString, isFutureDate, isToday } from '../utils';
+import { getTodayString, isFutureDate } from '../utils';
 import { FoodLog } from '../types';
 
 interface MonthCalendarViewProps {

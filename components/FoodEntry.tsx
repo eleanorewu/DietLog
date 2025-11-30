@@ -4,6 +4,7 @@ import { Button } from './Button';
 import { generateId, getTodayString, isFutureDate } from '../utils';
 import { LogOut, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+import { Dialog } from './Dialog';
 
 interface FoodEntryProps {
   onSave: (log: FoodLog) => void;
@@ -22,6 +23,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   initialData,
   initialMealType
 }) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
@@ -137,9 +139,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
 
   const handleDelete = () => {
     if (initialData && onDelete) {
-      if (confirm('確定要刪除這筆紀錄嗎？')) {
-        onDelete(initialData.id);
-      }
+      setDeleteDialogOpen(true);
     }
   };
 
@@ -335,6 +335,22 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
           {initialData ? '更新紀錄' : '儲存紀錄'}
         </Button>
       </div>
+      
+      {/* 刪除確認 Dialog */}
+      <Dialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={() => {
+          if (initialData && onDelete) {
+            onDelete(initialData.id);
+          }
+        }}
+        title="刪除飲食紀錄"
+        message="確定要刪除這筆紀錄嗎？此操作無法復原。"
+        confirmText="刪除"
+        cancelText="取消"
+        isDangerous={true}
+      />
     </div>
   );
 };

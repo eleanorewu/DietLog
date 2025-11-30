@@ -130,12 +130,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                        targetWeightNum > 0 && 
                        weeklyWeightLossNum > 0;
 
-  // Calculate days to reach target weight
-  const calculateDaysToTarget = () => {
+  // Calculate weeks to reach target weight (rounded up)
+  const calculateWeeksToTarget = () => {
     if (!isStep2Valid || !isStep4Valid) return 0;
     const weightDiff = Math.abs(weightNum - targetWeightNum);
     const weeks = weightDiff / weeklyWeightLossNum;
-    return Math.ceil(weeks * 7);
+    return Math.ceil(weeks);
   };
 
   const handleFinish = () => {
@@ -175,12 +175,36 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="flex flex-col h-full p-6 max-w-md mx-auto">
-      <div className="flex-1 flex flex-col justify-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">歡迎使用 DietLog</h1>
-        <p className="text-slate-500 mb-8">讓我們為您建立個人化計畫。</p>
+    <div className="flex flex-col h-full">
+      {/* Header - 固定在頂部 */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-md mx-auto px-6 pt-6 pb-4">
+          <h1 className="text-2xl font-bold text-slate-800 mb-1">歡迎使用 DietLog</h1>
+          <p className="text-sm text-slate-500">讓我們為您建立個人化計畫。</p>
+        </div>
+        
+        {/* 進度條 */}
+        <div className="relative">
+          <div className="w-full" style={{ height: '3px', backgroundColor: '#f1f5f9' }}>
+            <div 
+              className="h-full bg-emerald-500 transition-all duration-300 ease-out"
+              style={{ width: `${(step / 5) * 100}%` }}
+            />
+          </div>
+          {/* 步驟提示 */}
+          <div className="absolute right-2 -bottom-5">
+            <span className="text-xs">
+              <span className="text-slate-600">{step}</span>
+              <span className="text-slate-400"> / 5</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
-        {step === 1 && (
+      {/* 內容區域 - 可滾動 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-md mx-auto px-6 py-6">
+          {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">請問您的名字是？<span className="text-red-500">*</span></label>
@@ -408,12 +432,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               )}
             </div>
 
-            {/* Display estimated days to reach target */}
+            {/* Display estimated weeks to reach target */}
             {isStep2Valid && isStep4Valid && (
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
                 <p className="text-xs font-semibold text-slate-500 mb-2">預估達成時間</p>
                 <p className="text-2xl font-bold text-blue-700 mb-1">
-                  {calculateDaysToTarget()} 天
+                  約 {calculateWeeksToTarget()} 週
                 </p>
                 <p className="text-sm text-slate-600">
                   從目前 {Number(formData.weight).toFixed(2)} kg 到目標 {Number(formData.targetWeight).toFixed(2)} kg
@@ -426,29 +450,37 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             )}
           </div>
         )}
+        </div>
       </div>
 
-      <div className="mt-6 flex space-x-4">
-        {step > 1 && (
-          <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">
-            上一步
+      {/* 底部按鈕區域 - 固定在底部 */}
+      <div className="bg-white border-t border-slate-100 p-6 max-w-md mx-auto w-full">
+        <div className="flex gap-3">
+          {step > 1 && (
+            <Button
+              variant="outline"
+              onClick={() => setStep(step - 1)}
+              className="flex-1"
+            >
+              上一步
+            </Button>
+          )}
+          <Button
+            fullWidth={step === 1}
+            className={step === 1 ? '' : 'flex-1'}
+            disabled={
+              (step === 1 && !isStep1Valid) ||
+              (step === 2 && !isStep2Valid) ||
+              (step === 5 && !isStep4Valid)
+            }
+            onClick={() => {
+              if (step < 5) setStep(step + 1);
+              else handleFinish();
+            }}
+          >
+            {step === 5 ? '建立計畫' : '下一步'}
           </Button>
-        )}
-        <Button
-          fullWidth
-          className="flex-1"
-          disabled={
-            (step === 1 && !isStep1Valid) ||
-            (step === 2 && !isStep2Valid) ||
-            (step === 5 && !isStep4Valid)
-          }
-          onClick={() => {
-            if (step < 5) setStep(step + 1);
-            else handleFinish();
-          }}
-        >
-          {step === 5 ? '建立計畫' : '下一步'}
-        </Button>
+        </div>
       </div>
     </div>
   );

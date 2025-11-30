@@ -50,13 +50,13 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
   const hasValidHeightWeight = Number.isFinite(heightNum) && Number.isFinite(weightNum) && heightNum > 0 && weightNum > 0;
   const bmiValue = hasValidHeightWeight ? calculateBMI(weightNum, heightNum) : null;
 
-  // Calculate days to reach target weight
-  const calculateDaysToTarget = () => {
+  // Calculate weeks to reach target weight
+  const calculateWeeksToTarget = () => {
     if (!hasValidHeightWeight || !Number.isFinite(targetWeightNum) || !Number.isFinite(weeklyWeightLossNum) || 
         targetWeightNum <= 0 || weeklyWeightLossNum <= 0) return 0;
     const weightDiff = Math.abs(weightNum - targetWeightNum);
     const weeks = weightDiff / weeklyWeightLossNum;
-    return Math.ceil(weeks * 7);
+    return Math.ceil(weeks);
   };
 
   const handleSave = () => {
@@ -248,13 +248,13 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
             </div>
           </div>
 
-          {/* Display estimated days to reach target */}
+          {/* Display estimated weeks to reach target */}
           {hasValidHeightWeight && Number.isFinite(targetWeightNum) && Number.isFinite(weeklyWeightLossNum) && 
            targetWeightNum > 0 && weeklyWeightLossNum > 0 && (
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-3 rounded-lg">
               <p className="text-xs font-semibold text-slate-600 mb-1">預估達成時間</p>
               <p className="text-xl font-bold text-blue-700 mb-1">
-                {calculateDaysToTarget()} 天
+                約 {calculateWeeksToTarget()} 週
               </p>
               <p className="text-xs text-slate-600">
                 從目前 {weightNum.toFixed(2)} kg 到目標 {targetWeightNum.toFixed(2)} kg

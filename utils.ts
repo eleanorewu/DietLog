@@ -1,4 +1,4 @@
-import { ActivityLevel, Gender, Goal, UserProfile } from './types';
+import { ActivityLevel, Gender, Goal } from './types';
 
 export const calculateBMI = (weight: number, height: number): number => {
   // BMI = 體重(kg) / (身高(m) ^ 2)

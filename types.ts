@@ -33,13 +33,6 @@ export interface FoodLog {
   carbs: number;
 }
 
-export interface DailyStats {
-  totalCalories: number;
-  totalProtein: number;
-  totalFat: number;
-  totalCarbs: number;
-  remainingCalories: number;
-}
 export interface WeightRecord {
   id: string;
   date: string; // YYYY-MM-DD
