@@ -50,14 +50,8 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
 
   const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
 
-  // 檢查該月是否有任何紀錄
-  const monthHasLogs = days.some((day) => {
-    if (day === null) return false;
-    return hasLogs(getDateString(day));
-  });
-
   return (
-    <div className="flex flex-col h-full bg-white animate-slideIn">
+    <div className="flex flex-col h-full bg-white animate-slideIn relative">
       {/* Header */}
       <div className="flex items-center p-4">
         <button 
@@ -70,33 +64,11 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto no-scrollbar py-2 px-4 pb-16">
         {/* Month Title */}
         <h2 className="text-2xl font-bold text-slate-800 text-center mb-4">
           {currentMonth.getMonth() + 1}月 {currentMonth.getFullYear()}
         </h2>
-
-        {/* Legend - Only show if month has records */}
-        {monthHasLogs && (
-          <div className="flex items-center justify-center gap-4 mb-6 text-xs">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-emerald-500" />
-              <span className="text-slate-600">已選</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded border-2 border-emerald-500 bg-slate-50" />
-              <span className="text-slate-600">今天</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-slate-50 border border-slate-200 relative">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-1 h-1 rounded-full bg-slate-400" />
-                </div>
-              </div>
-              <span className="text-slate-600">有紀錄</span>
-            </div>
-          </div>
-        )}
 
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-6">
@@ -130,7 +102,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-2 mb-6">
           {days.map((day, index) => {
             if (day === null) {
               return <div key={`empty-${index}`} className="h-14" />;
@@ -152,7 +124,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
                   }
                 }}
                 disabled={isFuture}
-                className={`h-14 rounded-lg font-semibold text-sm relative flex items-center justify-center transition-all ${
+                className={`h-11 rounded-lg font-semibold text-sm relative flex items-center justify-center transition-all ${
                   isSelected
                     ? 'bg-emerald-500 text-white shadow-md'
                     : isFuture
@@ -165,12 +137,34 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({
                 <div className="flex flex-col items-center justify-center">
                   <span>{day}</span>
                   {hasRecord && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-current mt-1" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
                   )}
                 </div>
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Legend - Fixed at bottom center */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white py-3">
+        <div className="flex items-center justify-center gap-4 text-xs">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-emerald-500" />
+            <span className="text-slate-600">已選</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded border-2 border-emerald-500 bg-slate-50" />
+            <span className="text-slate-600">今天</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded bg-slate-50 border border-slate-200 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-1 h-1 rounded-full bg-slate-400" />
+              </div>
+            </div>
+            <span className="text-slate-600">有紀錄</span>
+          </div>
         </div>
       </div>
     </div>

@@ -345,6 +345,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   { val: 'light', label: '輕度活動 (每週運動 1-2 天)' },
                   { val: 'moderate', label: '中度活動 (每週運動 3-5 天)' },
                   { val: 'active', label: '高度活動 (每天運動)' },
+                  { val: 'veryActive', label: '超高度活動 (每天高強度運動或體力工作)' },
                 ].map((opt) => (
                   <button
                     key={opt.val}

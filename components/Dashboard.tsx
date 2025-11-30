@@ -245,12 +245,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                   }`}
                   disabled={isFuture}
-                  style={{ height: '52px', paddingTop: '6px', paddingBottom: '4px' }}
+                  style={{ height: '48px', paddingTop: '6px', paddingBottom: '4px' }}
                 >
                   <span className="text-xs leading-tight">{dayName}</span>
-                  <span className="mt-0.5 leading-tight">{dayNum}</span>
+                  <span className="text-xs leading-tight">{dayNum}</span>
                   {hasRecord && (
-                    <div className="mt-auto mb-1 w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
+                    <div className="mt-auto mb-0.5 w-1 h-1 rounded-full bg-current flex-shrink-0" />
                   )}
                 </button>
               );

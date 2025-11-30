@@ -51,6 +51,8 @@ export const getActivityMultiplier = (level: ActivityLevel): number => {
       return 1.55;
     case 'active':
       return 1.725;
+    case 'veryActive':
+      return 1.9;
     default:
       return 1.2;
   }

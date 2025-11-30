@@ -179,6 +179,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               { val: 'light', label: '輕度活動 (1-2天/週)' },
               { val: 'moderate', label: '中度活動 (3-5天/週)' },
               { val: 'active', label: '高度活動 (每天運動)' },
+              { val: 'veryActive', label: '超高度活動 (每天高強度運動或體力工作)' },
             ].map((opt) => (
               <button
                 key={opt.val}

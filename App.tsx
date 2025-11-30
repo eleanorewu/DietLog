@@ -5,6 +5,8 @@ import { FoodEntry } from './components/FoodEntry';
 import { EditProfile } from './components/EditProfile';
 import { MonthCalendarView } from './components/MonthCalendarView';
 import { WeightTracking } from './components/WeightTracking';
+import { WeightDataList } from './components/WeightDataList';
+import { CalorieTracking } from './components/CalorieTracking';
 import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
@@ -15,7 +17,7 @@ const STORAGE_KEY_USER = 'dietlog_user_v1';
 const STORAGE_KEY_LOGS = 'dietlog_logs_v1';
 const STORAGE_KEY_WEIGHT_RECORDS = 'dietlog_weight_records_v1';
 
-type View = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'edit-profile' | 'calendar';
+type View = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'edit-profile' | 'calendar' | 'weight-data-list';
 
 function App() {
   const [view, setView] = useState<View>('onboarding');
@@ -142,6 +144,18 @@ function App() {
 
   const handleSaveProfile = (updatedProfile: UserProfile) => {
     setUser(updatedProfile);
+    
+    // Ensure there's at least one weight record
+    if (weightRecords.length === 0) {
+      const initialRecord: WeightRecord = {
+        id: Date.now().toString(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        weight: updatedProfile.weight,
+      };
+      setWeightRecords([initialRecord]);
+    }
+    
     setView('settings');
   };
 
@@ -184,6 +198,10 @@ function App() {
       const filteredRecords = prev.filter(record => record.date !== today);
       return [newRecord, ...filteredRecords];
     });
+  };
+
+  const handleDeleteWeightRecord = (recordId: string) => {
+    setWeightRecords(prev => prev.filter(record => record.id !== recordId));
   };
 
   const handleReset = () => {
@@ -273,13 +291,6 @@ function App() {
                 </div>
 
                 <div className="space-y-4">
-                  {/* Weight Tracking Section */}
-                  <WeightTracking
-                    user={user}
-                    weightRecords={weightRecords}
-                    onUpdateWeight={handleUpdateWeight}
-                  />
-
                   {/* Profile Section */}
                   <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-center mb-4">
@@ -293,24 +304,61 @@ function App() {
                     </div>
                     
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">每日目標</span>
-                        <span className="font-bold text-emerald-600">{user.targetCalories} kcal</span>
-                      </div>
                        <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-600">每日總消耗 (TDEE)</span>
-                        <span className="font-bold text-slate-900">{user.tdee} kcal</span>
+                         <span className="text-sm text-slate-600">年齡</span>
+                         <span className="font-bold text-slate-900">{user.age} 歲</span>
                       </div>
                       <div className="flex justify-between items-center">
                          <span className="text-sm text-slate-600">身高</span>
                          <span className="font-bold text-slate-900">{user.height} cm</span>
                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">年齡</span>
-                         <span className="font-bold text-slate-900">{user.age} 歲</span>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">體重</span>
+                         <span className="font-bold text-slate-900">{user.weight} kg</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">活動量等級</span>
+                         <span className="font-bold text-slate-900">
+                           {user.activityLevel === 'sedentary' && '久坐'}
+                           {user.activityLevel === 'light' && '輕度活動'}
+                           {user.activityLevel === 'moderate' && '中度活動'}
+                           {user.activityLevel === 'active' && '高度活動'}
+                           {user.activityLevel === 'veryActive' && '超高度活動'}
+                         </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">目標</span>
+                         <span className="font-bold text-slate-900">
+                           {user.goal === 'lose' && '減重'}
+                           {user.goal === 'maintain' && '維持體重'}
+                           {user.goal === 'gain' && '增肌'}
+                         </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">目標體重</span>
+                         <span className="font-bold text-slate-900">{user.targetWeight.toFixed(2)} kg</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-sm text-slate-600">每週減重</span>
+                         <span className="font-bold text-slate-900">{user.weeklyWeightLoss.toFixed(2)} kg</span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Calorie Tracking Section */}
+                  <CalorieTracking
+                    user={user}
+                    logs={logs}
+                  />
+
+                  {/* Weight Tracking Section */}
+                  <WeightTracking
+                    user={user}
+                    weightRecords={weightRecords}
+                    onUpdateWeight={handleUpdateWeight}
+                    onDeleteWeightRecord={handleDeleteWeightRecord}
+                    onNavigateToDataList={() => setView('weight-data-list')}
+                  />
 
                   <button 
                     onClick={handleReset}
@@ -322,6 +370,15 @@ function App() {
                   <p className="text-center text-xs text-slate-400 mt-4 pb-4">DietLog v1.2</p>
                 </div>
              </div>
+          )}
+
+          {/* Weight Data List View */}
+          {view === 'weight-data-list' && user && (
+            <WeightDataList
+              weightRecords={weightRecords}
+              onBack={() => setView('settings')}
+              onDeleteWeightRecord={handleDeleteWeightRecord}
+            />
           )}
         </div>
 

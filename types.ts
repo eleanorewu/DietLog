@@ -1,5 +1,5 @@
 export type Gender = 'male' | 'female';
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active';
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'veryActive';
 export type Goal = 'lose' | 'maintain' | 'gain';
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
