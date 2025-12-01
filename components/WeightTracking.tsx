@@ -61,6 +61,12 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
       weight: record.weight,
       displayDate: new Date(record.date + 'T00:00:00').toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
     }));
+  
+  // 計算圖表的最小和最大體重，用於設定 Y 軸範圍
+  const weights = chartData.map(d => d.weight);
+  const minWeight = Math.min(...weights, user.targetWeight);
+  const maxWeight = Math.max(...weights, user.targetWeight);
+  const yAxisPadding = (maxWeight - minWeight) * 0.1 || 2; // 至少2kg的padding
 
   return (
     <div className="space-y-4">
@@ -159,47 +165,55 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
             </button>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis 
-                  dataKey="displayDate" 
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  stroke="#cbd5e1"
-                />
-                <YAxis 
-                  domain={['dataMin - 2', 'dataMax + 2']}
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  stroke="#cbd5e1"
-                  width={45}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    color: '#475569'
-                  }}
-                  labelStyle={{ color: '#475569' }}
-                  formatter={(value: number) => [`${value.toFixed(2)} kg`, '體重']}
-                />
-                <ReferenceLine 
-                  y={user.targetWeight} 
-                  stroke="#10b981" 
-                  strokeDasharray="5 5"
-                  label={{ value: '目標', position: 'right', fill: '#10b981', fontSize: 12 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="weight" 
-                  stroke="#10b981" 
-                  strokeWidth={2}
-                  dot={{ fill: '#10b981', r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 400), height: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: chartData.length > 14 ? 50 : 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="displayDate" 
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                      stroke="#cbd5e1"
+                      interval={0}
+                      angle={chartData.length > 14 ? -45 : 0}
+                      textAnchor={chartData.length > 14 ? 'end' : 'middle'}
+                      height={chartData.length > 14 ? 60 : 30}
+                    />
+                    <YAxis 
+                      domain={[minWeight - yAxisPadding, maxWeight + yAxisPadding]}
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                      stroke="#cbd5e1"
+                      width={45}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        color: '#475569'
+                      }}
+                      labelStyle={{ color: '#475569' }}
+                      formatter={(value: number) => [`${value.toFixed(2)} kg`, '體重']}
+                    />
+                    <ReferenceLine 
+                      y={user.targetWeight} 
+                      stroke="#10b981" 
+                      strokeDasharray="5 5"
+                      label={{ value: '目標', position: 'right', fill: '#10b981', fontSize: 12 }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="weight" 
+                      stroke="#10b981" 
+                      strokeWidth={2}
+                      dot={{ fill: '#10b981', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </div>
       )}
