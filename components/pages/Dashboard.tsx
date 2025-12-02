@@ -1,11 +1,11 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { FoodLog, UserProfile, MealType } from '../types';
+import { FoodLog, UserProfile, MealType } from '../../types';
 import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2, Image } from 'lucide-react';
-import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
-import { SwipeableItem } from './SwipeableItem';
-import { Dialog } from './Dialog';
-import { useTheme } from '../contexts/ThemeContext';
+import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../../utils';
+import { SwipeableItem } from '../features/SwipeableItem';
+import { Dialog } from '../ui/Dialog';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface DashboardProps {
   user: UserProfile;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ActivityLevel, Gender, Goal, UserProfile } from '../types';
-import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
-import { Button } from './Button';
-import { useTheme } from '../contexts/ThemeContext';
+import { ActivityLevel, Gender, Goal, UserProfile } from '../../types';
+import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../../utils';
+import { Button } from '../ui/Button';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void;

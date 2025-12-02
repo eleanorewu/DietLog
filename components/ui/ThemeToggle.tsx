@@ -1,7 +1,7 @@
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { UserProfile } from '../types';
+import { useTheme } from '../../contexts/ThemeContext';
+import { UserProfile } from '../../types';
 
 interface ThemeToggleProps {
   user: UserProfile;

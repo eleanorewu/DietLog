@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FoodLog, MealType } from '../types';
-import { Button } from './Button';
-import { generateId, getTodayString, isFutureDate } from '../utils';
+import { FoodLog, MealType } from '../../types';
+import { Button } from '../ui/Button';
+import { generateId, getTodayString, isFutureDate } from '../../utils';
 import { LogOut, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
-import { Dialog } from './Dialog';
-import { useTheme } from '../contexts/ThemeContext';
+import { Dialog } from '../ui/Dialog';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface FoodEntryProps {
   onSave: (log: FoodLog) => void;

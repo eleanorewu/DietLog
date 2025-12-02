@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ActivityLevel, Goal, UserProfile } from '../types';
-import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
-import { Button } from './Button';
+import { ActivityLevel, Goal, UserProfile } from '../../types';
+import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../../utils';
+import { Button } from '../ui/Button';
 import { LogOut } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface EditProfileProps {
   user: UserProfile;

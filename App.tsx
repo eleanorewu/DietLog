@@ -1,105 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { Onboarding } from './components/Onboarding';
-import { Dashboard } from './components/Dashboard';
-import { FoodEntry } from './components/FoodEntry';
-import { EditProfile } from './components/EditProfile';
-import { MonthCalendarView } from './components/MonthCalendarView';
-import { WeightTracking } from './components/WeightTracking';
-import { WeightDataList } from './components/WeightDataList';
-import { CalorieTracking } from './components/CalorieTracking';
-import { ThemeToggle } from './components/ThemeToggle';
+import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList } from './components/pages';
+import { WeightTracking, CalorieTracking } from './components/features';
+import { ThemeToggle, Dialog } from './components/ui';
 import { FoodLog, UserProfile, WeightRecord, Theme } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
-import { Dialog } from './components/Dialog';
 import { ThemeProvider } from './contexts/ThemeContext';
-
-// Simple mock for local storage persistence
-const STORAGE_KEY_USER = 'dietlog_user_v1';
-const STORAGE_KEY_LOGS = 'dietlog_logs_v1';
-const STORAGE_KEY_WEIGHT_RECORDS = 'dietlog_weight_records_v1';
-
-type View = 'onboarding' | 'dashboard' | 'food-entry' | 'settings' | 'edit-profile' | 'calendar' | 'weight-data-list';
+import { useUserProfile, useFoodLogs, useWeightRecords, useNavigation } from './hooks';
 
 function App() {
-  const [view, setView] = useState<View>('onboarding');
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [logs, setLogs] = useState<FoodLog[]>([]);
-  const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  // 使用 custom hooks 管理狀態
+  const { user, setUser, updateUser, resetUser } = useUserProfile();
+  const { logs, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs();
+  const { weightRecords, addWeightRecord, deleteWeightRecord, resetWeightRecords } = useWeightRecords();
+  const { view, selectedDate, setView, setSelectedDate, navigateTo, navigateToDate } = useNavigation();
   
-  // New States for Features
-  const [selectedDate, setSelectedDate] = useState<string>(getTodayString());
+  // UI 狀態
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<FoodLog | null>(null);
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
 
-  // Load data on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem(STORAGE_KEY_USER);
-    const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
-    const savedWeightRecords = localStorage.getItem(STORAGE_KEY_WEIGHT_RECORDS);
-
-    let parsedUser = null;
-
-    if (savedUser) {
-      parsedUser = JSON.parse(savedUser);
-      
-      // Migration: Add default values for new fields if they don't exist
-      if (!parsedUser.targetWeight) {
-        parsedUser.targetWeight = parsedUser.weight - 5; // Default: 5kg less than current
-      }
-      if (!parsedUser.weeklyWeightLoss) {
-        parsedUser.weeklyWeightLoss = 0.5; // Default: 0.5kg per week
-      }
-      if (!parsedUser.theme) {
-        parsedUser.theme = 'light'; // Default: light theme
-      }
-      
-      setUser(parsedUser);
-      setView('dashboard');
-    } else {
-      setView('onboarding');
-    }
-
-    if (savedLogs) {
-      setLogs(JSON.parse(savedLogs));
-    }
-
-    if (savedWeightRecords) {
-      setWeightRecords(JSON.parse(savedWeightRecords));
-    } else if (parsedUser) {
-      // Migration: Create initial weight record for existing users
-      const initialRecord: WeightRecord = {
-        id: Date.now().toString(),
-        date: getTodayString(),
-        timestamp: Date.now(),
-        weight: parsedUser.weight,
-      };
-      setWeightRecords([initialRecord]);
-    }
-  }, []);
-
-  // Save logs on change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(logs));
-  }, [logs]);
-
-  // Save user on change
+  // 初始化：檢查是否有使用者資料，設置初始體重記錄
   useEffect(() => {
     if (user) {
-      localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user));
+      navigateTo('dashboard');
+      // 如果是舊使用者且沒有體重記錄，建立初始記錄
+      if (weightRecords.length === 0) {
+        const initialRecord: WeightRecord = {
+          id: Date.now().toString(),
+          date: getTodayString(),
+          timestamp: Date.now(),
+          weight: user.weight,
+        };
+        addWeightRecord(initialRecord);
+      }
+    } else {
+      navigateTo('onboarding');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-  // Save weight records on change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_WEIGHT_RECORDS, JSON.stringify(weightRecords));
-  }, [weightRecords]);
 
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUser(profile);
     
-    // Create initial weight record only if no records exist
+    // 建立初始體重記錄
     if (weightRecords.length === 0) {
       const initialRecord: WeightRecord = {
         id: Date.now().toString(),
@@ -107,31 +51,28 @@ function App() {
         timestamp: Date.now(),
         weight: profile.weight,
       };
-      setWeightRecords([initialRecord]);
+      addWeightRecord(initialRecord);
     }
     
-    setView('dashboard');
+    navigateTo('dashboard');
   };
 
   const handleSaveFood = (log: FoodLog) => {
     if (editingLog) {
-      // Update existing log
-      setLogs((prev) => prev.map((item) => (item.id === log.id ? log : item)));
+      updateLog(log);
     } else {
-      // Create new log
-      setLogs((prev) => [log, ...prev]);
+      addLog(log);
     }
     setEditingLog(null);
-    setView('dashboard');
+    navigateTo('dashboard');
   };
 
   const handleDeleteFood = (id: string) => {
-    setLogs((prev) => prev.filter((item) => item.id !== id));
-    // Only reset editing log and change view if we're in the food-entry view
+    deleteLog(id);
     if (editingLog && editingLog.id === id) {
       setEditingLog(null);
       if (view === 'food-entry') {
-        setView('dashboard');
+        navigateTo('dashboard');
       }
     }
   };
@@ -139,18 +80,18 @@ function App() {
   const handleOpenAddFood = (mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
     setEditingLog(null);
     setDefaultMealType(mealType);
-    setView('food-entry');
+    navigateTo('food-entry');
   };
 
   const handleOpenEditFood = (log: FoodLog) => {
     setEditingLog(log);
-    setView('food-entry');
+    navigateTo('food-entry');
   };
 
   const handleSaveProfile = (updatedProfile: UserProfile) => {
-    setUser(updatedProfile);
+    updateUser(updatedProfile);
     
-    // Ensure there's at least one weight record
+    // 確保有體重記錄
     if (weightRecords.length === 0) {
       const initialRecord: WeightRecord = {
         id: Date.now().toString(),
@@ -158,16 +99,16 @@ function App() {
         timestamp: Date.now(),
         weight: updatedProfile.weight,
       };
-      setWeightRecords([initialRecord]);
+      addWeightRecord(initialRecord);
     }
     
-    setView('settings');
+    navigateTo('settings');
   };
 
   const handleUpdateWeight = (newWeight: number) => {
     if (!user) return;
 
-    // Recalculate all metrics with new weight
+    // 重新計算所有指標
     const bmr = calculateBMR(user.gender, newWeight, user.height, user.age);
     const tdee = calculateTDEE(bmr, user.activityLevel);
     const targetCalories = calculateTargetCalories(tdee, user.goal);
@@ -183,36 +124,24 @@ function App() {
       targetCarbs: macros.carbs,
     };
 
-    setUser(updatedProfile);
-
-    // Automatically add a weight record when updating weight
+    updateUser(updatedProfile);
     handleAddWeightRecord(newWeight);
   };
 
   const handleAddWeightRecord = (weight: number) => {
-    const today = getTodayString();
     const newRecord: WeightRecord = {
       id: Date.now().toString(),
-      date: today,
+      date: getTodayString(),
       timestamp: Date.now(),
       weight,
     };
-    
-    // Remove any existing record from today, keep only the latest
-    setWeightRecords(prev => {
-      const filteredRecords = prev.filter(record => record.date !== today);
-      return [newRecord, ...filteredRecords];
-    });
-  };
-
-  const handleDeleteWeightRecord = (recordId: string) => {
-    setWeightRecords(prev => prev.filter(record => record.id !== recordId));
+    addWeightRecord(newRecord);
   };
 
   const handleThemeChange = (newTheme: Theme) => {
     if (user) {
       const updatedUser = { ...user, theme: newTheme };
-      setUser(updatedUser);
+      updateUser(updatedUser);
     }
   };
 
@@ -221,15 +150,13 @@ function App() {
   };
   
   const confirmReset = () => {
-    localStorage.removeItem(STORAGE_KEY_USER);
-    localStorage.removeItem(STORAGE_KEY_LOGS);
-    localStorage.removeItem(STORAGE_KEY_WEIGHT_RECORDS);
-    setUser(null);
-    setLogs([]);
-    setWeightRecords([]);
+    resetUser();
+    resetLogs();
+    resetWeightRecords();
     setEditingLog(null);
     setSelectedDate(getTodayString());
-    setView('onboarding');
+    navigateTo('onboarding');
+    setResetDialogOpen(false);
   };
 
   return (
@@ -254,8 +181,8 @@ function App() {
               onAddFood={handleOpenAddFood}
               onEditFood={handleOpenEditFood}
               onDeleteFood={handleDeleteFood}
-              onOpenSettings={() => setView('settings')}
-              onOpenCalendar={() => setView('calendar')}
+              onOpenSettings={() => navigateTo('settings')}
+              onOpenCalendar={() => navigateTo('calendar')}
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
             />
@@ -265,7 +192,7 @@ function App() {
             <FoodEntry 
               onSave={handleSaveFood}
               onDelete={editingLog ? handleDeleteFood : undefined}
-              onCancel={() => setView('dashboard')} 
+              onCancel={() => navigateTo('dashboard')} 
               initialData={editingLog}
               initialDate={selectedDate}
               initialMealType={defaultMealType}
@@ -276,7 +203,7 @@ function App() {
             <EditProfile 
               user={user}
               onSave={handleSaveProfile}
-              onCancel={() => setView('settings')}
+              onCancel={() => navigateTo('settings')}
             />
           )}
 
@@ -284,18 +211,15 @@ function App() {
             <MonthCalendarView
               logs={logs}
               selectedDate={selectedDate}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                setView('dashboard');
-              }}
-              onClose={() => setView('dashboard')}
+              onDateSelect={navigateToDate}
+              onClose={() => navigateTo('dashboard')}
             />
           )}
 
           {view === 'settings' && user && (
              <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 dark:bg-gray-900 overflow-y-auto no-scrollbar transition-colors duration-200">
                 <div className="flex items-center mb-6">
-                   <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                   <button onClick={() => navigateTo('dashboard')} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
                       <LogOut className="rotate-180" size={24}/>
                    </button>
                    <h1 className="text-xl font-bold ml-2 text-slate-900 dark:text-gray-100">設定</h1>
@@ -310,7 +234,7 @@ function App() {
                     <div className="flex justify-between items-center mb-4">
                        <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">我的個人檔案</h3>
                        <button 
-                         onClick={() => setView('edit-profile')}
+                         onClick={() => navigateTo('edit-profile')}
                          className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
                        >
                          <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
@@ -370,7 +294,7 @@ function App() {
                     user={user}
                     weightRecords={weightRecords}
                     onUpdateWeight={handleUpdateWeight}
-                    onNavigateToDataList={() => setView('weight-data-list')}
+                    onNavigateToDataList={() => navigateTo('weight-data-list')}
                   />
 
                   <button 
@@ -389,8 +313,8 @@ function App() {
           {view === 'weight-data-list' && user && (
             <WeightDataList
               weightRecords={weightRecords}
-              onBack={() => setView('settings')}
-              onDeleteWeightRecord={handleDeleteWeightRecord}
+              onBack={() => navigateTo('settings')}
+              onDeleteWeightRecord={deleteWeightRecord}
             />
           )}
         </div>

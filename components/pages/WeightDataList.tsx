@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { WeightRecord } from '../types';
+import { WeightRecord } from '../../types';
 import { LogOut, Trash2 } from 'lucide-react';
-import { Dialog } from './Dialog';
-import { useTheme } from '../contexts/ThemeContext';
+import { Dialog } from '../ui/Dialog';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface WeightDataListProps {
   weightRecords: WeightRecord[];

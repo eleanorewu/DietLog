@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { FoodLog, UserProfile } from '../types';
-import { useTheme } from '../contexts/ThemeContext';
+import { FoodLog, UserProfile } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface CalorieTrackingProps {
   user: UserProfile;

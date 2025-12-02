@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { WeightRecord, UserProfile } from '../types';
+import { WeightRecord, UserProfile } from '../../types';
 import { SquarePen, List } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface WeightTrackingProps {
   user: UserProfile;

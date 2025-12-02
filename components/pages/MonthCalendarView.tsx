@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
-import { getTodayString, isFutureDate } from '../utils';
-import { FoodLog } from '../types';
-import { useTheme } from '../contexts/ThemeContext';
+import { getTodayString, isFutureDate } from '../../utils';
+import { FoodLog } from '../../types';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface MonthCalendarViewProps {
   logs: FoodLog[];
