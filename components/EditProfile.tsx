@@ -3,6 +3,7 @@ import { ActivityLevel, Goal, UserProfile } from '../types';
 import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
 import { Button } from './Button';
 import { LogOut } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface EditProfileProps {
   user: UserProfile;
@@ -11,6 +12,7 @@ interface EditProfileProps {
 }
 
 export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel }) => {
+  const { theme } = useTheme();
   const [formData, setFormData] = useState({
     name: user.name,
     age: user.age,
@@ -91,21 +93,21 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
   };
 
   return (
-    <div className="flex flex-col h-full bg-white animate-slideIn">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 animate-slideIn transition-colors duration-200">
       <div className="flex items-center p-4">
-        <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
+        <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
           <LogOut className="rotate-180" size={24}/>
         </button>
-        <h1 className="text-xl font-bold ml-2">編輯個人檔案</h1>
+        <h1 className="text-xl font-bold ml-2 text-slate-900 dark:text-gray-100">編輯個人檔案</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-6">
         {/* Basic Stats */}
-        <div className="bg-slate-50 p-4 rounded-xl space-y-4">
-          <h3 className="font-bold text-slate-700">基本資料</h3>
+        <div className="bg-slate-50 dark:bg-gray-800 p-4 rounded-xl space-y-4 transition-colors duration-200">
+          <h3 className="font-bold text-slate-700 dark:text-gray-200">基本資料</h3>
           
           <div>
-            <label className="block text-xs font-bold text-slate-400 mb-1">年齡<span className="text-red-500">*</span></label>
+            <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">年齡<span className="text-red-500 dark:text-red-400">*</span></label>
             <input
               type="number"
               value={formData.age}
@@ -115,7 +117,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
                   handleChange('age', parseInt(val) || '');
                 }
               }}
-              className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+              className="w-full bg-white dark:bg-gray-600 border border-slate-200 dark:border-gray-500 rounded-lg p-2 outline-none font-medium text-slate-900 dark:text-gray-100 transition-colors duration-200"
               min="1"
               step="1"
               required
@@ -124,32 +126,32 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">身高 (cm)<span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">身高 (cm)<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.height}
                 placeholder="範例: 165.5"
                 onChange={(e) => handleDecimalInput(e.target.value, 'height')}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                className="w-full bg-white dark:bg-gray-600 border border-slate-200 dark:border-gray-500 rounded-lg p-2 outline-none font-medium text-slate-900 dark:text-gray-100 transition-colors duration-200"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">體重 (kg)<span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">體重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.weight}
                 placeholder="範例: 60.45"
                 onChange={(e) => handleDecimalInput(e.target.value, 'weight')}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                className="w-full bg-white dark:bg-gray-600 border border-slate-200 dark:border-gray-500 rounded-lg p-2 outline-none font-medium text-slate-900 dark:text-gray-100 transition-colors duration-200"
                 required
               />
             </div>
           </div>
 
           {/* BMI Display with Progress Bar - left-aligned vertical layout */}
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200 p-4 rounded-lg">
-            <p className="text-xs font-semibold text-slate-600 mb-3">體重數值 (BMI)</p>
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 border border-emerald-200 dark:border-emerald-700 p-4 rounded-lg transition-colors duration-200">
+            <p className="text-xs font-semibold text-slate-600 dark:text-gray-300 mb-3">體重數值 (BMI)</p>
             
             {/* BMI Number - large and bold */}
             {bmiValue ? (
@@ -163,16 +165,17 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <p className={`text-sm font-semibold ${getBMICategory(bmiValue).color} mb-3`}>{getBMICategory(bmiValue).category}</p>
             )}
 
+            
             {/* Tip text - only when BMI available */}
             {bmiValue && (
-              <p className="text-sm text-slate-600">{getBMIDescription(bmiValue)}</p>
+              <p className="text-sm text-slate-600 dark:text-gray-300">{getBMIDescription(bmiValue)}</p>
             )}
           </div>
         </div>
 
         {/* Activity Level */}
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">活動量等級</label>
+          <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">活動量等級</label>
           <div className="space-y-2">
             {[
               { val: 'sedentary', label: '久坐 (辦公室工作)' },
@@ -186,8 +189,8 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
                 onClick={() => handleChange('activityLevel', opt.val)}
                 className={`w-full p-3 rounded-lg border text-left text-sm font-medium transition-colors ${
                   formData.activityLevel === opt.val
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                    : 'border-slate-200 bg-white text-slate-500'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-300'
                 }`}
               >
                 {opt.label}
@@ -198,7 +201,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
 
         {/* Goal */}
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">目標</label>
+          <label className="block text-sm font-bold text-slate-700 dark:text-gray-200 mb-2">目標</label>
           <div className="space-y-2">
             {[
               { val: 'lose', label: '減重' },
@@ -210,8 +213,8 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
                 onClick={() => handleChange('goal', opt.val)}
                 className={`w-full p-3 rounded-lg border text-left text-sm font-medium transition-colors ${
                   formData.goal === opt.val
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                    : 'border-slate-200 bg-white text-slate-500'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-300'
                 }`}
               >
                 {opt.label}
@@ -221,29 +224,27 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
         </div>
 
         {/* Target Weight and Weekly Weight Loss */}
-        <div className="bg-slate-50 p-4 rounded-xl space-y-4">
-          <h3 className="font-bold text-slate-700">減重計劃</h3>
-          
-          <div className="grid grid-cols-2 gap-4">
+        <div className="bg-slate-50 dark:bg-gray-800 p-4 rounded-xl space-y-4 transition-colors duration-200">
+          <h3 className="font-bold text-slate-700 dark:text-gray-200">減重計劃</h3>          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">目標體重 (kg)<span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">目標體重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.targetWeight}
                 placeholder="範例: 55.50"
                 onChange={(e) => handleDecimalInput(e.target.value, 'targetWeight')}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                className="w-full bg-white dark:bg-gray-600 border border-slate-200 dark:border-gray-500 rounded-lg p-2 outline-none font-medium text-slate-900 dark:text-gray-100 transition-colors duration-200"
                 required
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 mb-1">每週減重 (kg)<span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">每週減重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.weeklyWeightLoss}
                 placeholder="範例: 0.5"
                 onChange={(e) => handleDecimalInput(e.target.value, 'weeklyWeightLoss')}
-                className="w-full bg-white border border-slate-200 rounded-lg p-2 outline-none font-medium"
+                className="w-full bg-white dark:bg-gray-600 border border-slate-200 dark:border-gray-500 rounded-lg p-2 outline-none font-medium text-slate-900 dark:text-gray-100 transition-colors duration-200"
                 required
               />
             </div>
@@ -252,15 +253,15 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
           {/* Display estimated weeks to reach target */}
           {hasValidHeightWeight && Number.isFinite(targetWeightNum) && Number.isFinite(weeklyWeightLossNum) && 
            targetWeightNum > 0 && weeklyWeightLossNum > 0 && (
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-3 rounded-lg">
-              <p className="text-xs font-semibold text-slate-600 mb-1">預估達成時間</p>
-              <p className="text-xl font-bold text-blue-700 mb-1">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700 p-3 rounded-lg transition-colors duration-200">
+              <p className="text-xs font-semibold text-slate-600 dark:text-gray-300 mb-1">預估達成時間</p>
+              <p className="text-xl font-bold text-blue-700 dark:text-blue-400 mb-1">
                 約 {calculateWeeksToTarget()} 週
               </p>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-gray-300">
                 從目前 {weightNum.toFixed(2)} kg 到目標 {targetWeightNum.toFixed(2)} kg
               </p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
                 需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
                 每週減 {weeklyWeightLossNum.toFixed(2)} kg
               </p>
@@ -269,7 +270,7 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
         </div>
       </div>
 
-      <div className="p-4 bg-white border-t border-slate-100 pb-8">
+      <div className="p-4 bg-white dark:bg-gray-800 pb-8 transition-colors duration-200">
         <Button fullWidth onClick={handleSave}>
           更新並重新計算
         </Button>

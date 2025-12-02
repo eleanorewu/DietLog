@@ -5,6 +5,7 @@ import { generateId, getTodayString, isFutureDate } from '../utils';
 import { LogOut, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { Dialog } from './Dialog';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface FoodEntryProps {
   onSave: (log: FoodLog) => void;
@@ -23,6 +24,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   initialData,
   initialMealType
 }) => {
+  const { theme } = useTheme();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -154,25 +156,25 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   const isFutureDate_flag = isFutureDate(recordDate);
 
   return (
-    <div className="flex flex-col h-full bg-white animate-slideIn">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 animate-slideIn transition-colors duration-200">
       {/* 未來日期警告 */}
       {isFutureDate_flag && (
-        <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 flex items-center space-x-2">
-          <Lock size={16} className="text-amber-600 flex-shrink-0" />
-          <span className="text-xs text-amber-700 font-medium">未來日期無法編輯，請返回選擇當日或過去日期</span>
+        <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-6 py-3 flex items-center space-x-2">
+          <Lock size={16} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <span className="text-xs text-amber-700 dark:text-amber-300 font-medium">未來日期無法編輯，請返回選擇當日或過去日期</span>
         </div>
       )}
 
       {/* Top Bar */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center">
-          <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
+          <button onClick={onCancel} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
             <LogOut className="rotate-180" size={24} />
           </button>
-          <h1 className="text-xl font-bold ml-2">{initialData ? '編輯紀錄' : '新增飲食'}</h1>
+          <h1 className="text-xl font-bold ml-2 text-slate-900 dark:text-gray-100">{initialData ? '編輯飲食紀錄' : '新增飲食'}</h1>
         </div>
         {initialData && !isFutureDate_flag && (
-          <button onClick={handleDelete} className="p-2 text-red-500 rounded-full hover:bg-red-50">
+          <button onClick={handleDelete} className="p-2 text-red-500 dark:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors duration-200">
             <Trash2 size={20} />
           </button>
         )}
@@ -181,20 +183,20 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
       <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
         {/* Image Upload Area */}
         <div 
-          className={`h-64 bg-slate-50 relative flex items-center justify-center border-b border-slate-100 group ${
+          className={`h-64 bg-slate-50 dark:bg-gray-800 relative flex items-center justify-center group transition-colors duration-200 ${
             isFutureDate_flag ? 'cursor-not-allowed' : 'cursor-pointer'
           }`}
           onClick={() => !isFutureDate_flag && !isCompressing && fileInputRef.current?.click()}
         >
           {isCompressing ? (
-            <div className="flex flex-col items-center text-emerald-500">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mb-3"></div>
+            <div className="flex flex-col items-center text-emerald-500 dark:text-emerald-400">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 dark:border-emerald-400 mb-3"></div>
               <span className="font-medium">壓縮圖片中...</span>
             </div>
           ) : photoPreview ? (
             <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
           ) : (
-            <div className="flex flex-col items-center text-slate-400 group-hover:text-emerald-500 transition-colors">
+            <div className="flex flex-col items-center text-slate-400 dark:text-gray-600 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
               <ImageIcon size={48} className="mb-2" />
               <span className="font-medium">上傳圖片</span>
             </div>
@@ -224,20 +226,20 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
           
           {/* Name */}
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">食物名稱</label>
+            <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">食物名稱</label>
             <input
               type="text"
               placeholder="例如：雞胸肉沙拉"
               value={formData.name}
               onChange={(e) => !isFutureDate_flag && handleChange('name', e.target.value)}
               disabled={isFutureDate_flag}
-              className="w-full text-xl font-semibold border-b border-slate-200 py-2 focus:border-emerald-500 outline-none bg-transparent placeholder-slate-300 transition-colors disabled:opacity-50"
+              className="w-full text-xl font-semibold border-b border-slate-200 dark:border-gray-600 py-2 focus:border-emerald-500 dark:focus:border-emerald-400 outline-none bg-transparent placeholder-slate-300 dark:placeholder-gray-600 text-slate-900 dark:text-gray-100 transition-colors disabled:opacity-50"
             />
           </div>
 
           {/* Meal Type */}
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">餐別</label>
+            <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-3">餐別</label>
             <div className="grid grid-cols-4 gap-2">
               {(['breakfast', 'lunch', 'dinner', 'snack'] as MealType[]).map((type) => (
                 <button
@@ -247,7 +249,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
                   className={`py-2 px-1 rounded-lg text-sm font-medium truncate transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     formData.mealType === type
                       ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      : 'bg-slate-100 dark:bg-gray-700 text-slate-500 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {mealTypeLabels[type]}
@@ -258,63 +260,63 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
 
           {/* Macros Grid */}
           <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">營養成分</label>
+            <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-3">營養成分</label>
             <div className="space-y-3">
               <div className="col-span-1">
-                <label className="text-xs text-slate-500 mb-2 block">熱量 (kcal)</label>
+                <label className="text-xs text-slate-500 dark:text-gray-400 mb-2 block">熱量 (kcal)</label>
                 <input
                   type="text"
                   inputMode="numeric"
                   placeholder="0"
                   value={formData.calories}
                   onChange={(e) => handleChange('calories', e.target.value)}
-                  className="w-full p-4 bg-slate-50 rounded-xl text-2xl font-bold text-emerald-600 outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
+                  className="w-full p-4 bg-slate-50 dark:bg-gray-700 rounded-xl text-2xl font-bold text-emerald-600 dark:text-emerald-400 outline-none border-2 border-transparent focus:border-emerald-500 dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-gray-600 transition-all"
                 />
                 {fieldErrors.calories && (
-                  <p className="text-red-500 text-xs mt-1">{fieldErrors.calories}</p>
+                  <p className="text-red-500 dark:text-red-400 text-xs mt-1">{fieldErrors.calories}</p>
                 )}
               </div>
               <div className="space-y-3">
                  <div className="flex flex-col min-w-0">
-                    <label className="text-xs text-slate-500 font-medium mb-1">蛋白質 (g)</label>
+                    <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">蛋白質 (g)</label>
                     <input
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
                       value={formData.protein}
                       onChange={(e) => handleChange('protein', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
+                      className="w-full p-2 bg-slate-50 dark:bg-gray-700 rounded-lg text-sm font-semibold text-slate-900 dark:text-gray-100 outline-none border-2 border-transparent focus:border-emerald-500 dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-gray-600 transition-all"
                     />
                     {fieldErrors.protein && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.protein}</p>
+                      <p className="text-red-500 dark:text-red-400 text-xs mt-1">{fieldErrors.protein}</p>
                     )}
                  </div>
                  <div className="flex flex-col min-w-0">
-                    <label className="text-xs text-slate-500 font-medium mb-1">碳水 (g)</label>
+                    <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">碳水 (g)</label>
                     <input
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
                       value={formData.carbs}
                       onChange={(e) => handleChange('carbs', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
+                      className="w-full p-2 bg-slate-50 dark:bg-gray-700 rounded-lg text-sm font-semibold text-slate-900 dark:text-gray-100 outline-none border-2 border-transparent focus:border-emerald-500 dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-gray-600 transition-all"
                     />
                     {fieldErrors.carbs && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.carbs}</p>
+                      <p className="text-red-500 dark:text-red-400 text-xs mt-1">{fieldErrors.carbs}</p>
                     )}
                  </div>
                  <div className="flex flex-col min-w-0">
-                    <label className="text-xs text-slate-500 font-medium mb-1">脂肪 (g)</label>
+                    <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">脂肪 (g)</label>
                     <input
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
                       value={formData.fat}
                       onChange={(e) => handleChange('fat', e.target.value)}
-                      className="w-full p-2 bg-slate-50 rounded-lg text-sm font-semibold outline-none border-2 border-transparent focus:border-emerald-500 focus:bg-white transition-all"
+                      className="w-full p-2 bg-slate-50 dark:bg-gray-700 rounded-lg text-sm font-semibold text-slate-900 dark:text-gray-100 outline-none border-2 border-transparent focus:border-emerald-500 dark:focus:border-emerald-400 focus:bg-white dark:focus:bg-gray-600 transition-all"
                     />
                     {fieldErrors.fat && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.fat}</p>
+                      <p className="text-red-500 dark:text-red-400 text-xs mt-1">{fieldErrors.fat}</p>
                     )}
                  </div>
               </div>
@@ -325,7 +327,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
       </div>
       
       {/* Sticky Bottom Button */}
-      <div className="p-4 bg-white border-t border-slate-100 pb-8">
+      <div className="p-4 bg-white dark:bg-gray-900 pb-8 transition-colors duration-200">
         <Button 
           fullWidth 
           onClick={handleSubmit}

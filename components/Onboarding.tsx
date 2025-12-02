@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { ActivityLevel, Gender, Goal, UserProfile } from '../types';
 import { calculateBMR, calculateMacros, calculateTargetCalories, calculateTDEE, calculateBMI, getBMICategory, getBMIDescription } from '../utils';
 import { Button } from './Button';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface OnboardingProps {
   onComplete: (profile: UserProfile) => void;
 }
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+  const { theme } = useTheme();
   const [step, setStep] = useState(1);
   const [touched, setTouched] = useState({
     name: false,
@@ -175,17 +177,17 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-200">
       {/* Header - 固定在頂部 */}
-      <div className="bg-white border-b border-slate-100">
+      <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-700">
         <div className="max-w-md mx-auto px-6 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-slate-800 mb-1">歡迎使用 DietLog</h1>
-          <p className="text-sm text-slate-500">讓我們為您建立個人化計畫。</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1">歡迎使用 DietLog</h1>
+          <p className="text-sm text-slate-500 dark:text-gray-400">讓我們為您建立個人化計畫。</p>
         </div>
         
         {/* 進度條 */}
         <div className="relative">
-          <div className="w-full" style={{ height: '3px', backgroundColor: '#f1f5f9' }}>
+          <div className="w-full" style={{ height: '3px', backgroundColor: theme === 'dark' ? '#374151' : '#f1f5f9' }}>
             <div 
               className="h-full bg-emerald-500 transition-all duration-300 ease-out"
               style={{ width: `${(step / 5) * 100}%` }}
@@ -194,8 +196,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {/* 步驟提示 */}
           <div className="absolute right-2 -bottom-5">
             <span className="text-xs">
-              <span className="text-slate-600">{step}</span>
-              <span className="text-slate-400"> / 5</span>
+              <span className="text-slate-600 dark:text-gray-300">{step}</span>
+              <span className="text-slate-400 dark:text-gray-500"> / 5</span>
             </span>
           </div>
         </div>
@@ -207,33 +209,33 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">請問您的名字是？<span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">請問您的名字是？<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 onBlur={() => handleBlur('name')}
-                className={`w-full px-4 py-3 bg-white border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none ${
-                  getNameError() ? 'border-red-500' : 'border-slate-200'
+                className={`w-full px-4 py-3 bg-white dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 outline-none text-slate-900 dark:text-gray-100 transition-colors duration-200 ${
+                  getNameError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
                 }`}
                 placeholder="輸入名字"
                 required
               />
               {getNameError() && (
-                <p className="text-red-500 text-xs mt-1">{getNameError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getNameError()}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">性別</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">性別</label>
               <div className="grid grid-cols-2 gap-4">
                 {(['male', 'female'] as Gender[]).map((g) => (
                   <button
                     key={g}
                     onClick={() => handleChange('gender', g)}
-                    className={`px-4 py-3 rounded-xl border-2 font-medium ${
+                    className={`px-4 py-3 rounded-xl border-2 font-medium transition-colors duration-200 ${
                       formData.gender === g
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                        : 'border-slate-100 bg-white text-slate-500'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                        : 'border-slate-100 dark:border-gray-600 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400'
                     }`}
                   >
                     {genderLabels[g]}
@@ -242,9 +244,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               </div>
             </div>
              <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">年齡<span className="text-red-500">*</span></label>
-              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
-                getAgeError() ? 'border-red-500' : 'border-slate-200'
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">年齡<span className="text-red-500 dark:text-red-400">*</span></label>
+              <div className={`flex items-center bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 transition-colors duration-200 ${
+                getAgeError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
               }`}>
                 <input
                   type="number"
@@ -256,7 +258,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     }
                   }}
                   onBlur={() => handleBlur('age')}
-                  className="w-full outline-none"
+                  className="w-full outline-none bg-transparent text-slate-900 dark:text-gray-100"
                   placeholder="輸入年齡"
                   min="1"
                   step="1"
@@ -264,7 +266,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 />
               </div>
               {getAgeError() && (
-                <p className="text-red-500 text-xs mt-1">{getAgeError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getAgeError()}</p>
               )}
             </div>
           </div>
@@ -273,9 +275,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 2 && (
           <div className="space-y-6 animate-fadeIn">
              <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">身高 (cm)<span className="text-red-500">*</span></label>
-              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
-                getHeightError() ? 'border-red-500' : 'border-slate-200'
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">身高 (cm)<span className="text-red-500 dark:text-red-400">*</span></label>
+              <div className={`flex items-center bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 transition-colors duration-200 ${
+                getHeightError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
               }`}>
                 <input
                   type="text"
@@ -283,18 +285,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   placeholder="範例: 165.5"
                   onChange={(e) => handleDecimalInput(e.target.value, 'height')}
                   onBlur={() => handleBlur('height')}
-                  className="w-full outline-none"
+                  className="w-full outline-none bg-transparent text-slate-900 dark:text-gray-100"
                   required
                 />
               </div>
               {getHeightError() && (
-                <p className="text-red-500 text-xs mt-1">{getHeightError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getHeightError()}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">體重 (kg)<span className="text-red-500">*</span></label>
-              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
-                getWeightError() ? 'border-red-500' : 'border-slate-200'
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">體重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
+              <div className={`flex items-center bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 transition-colors duration-200 ${
+                getWeightError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
               }`}>
                 <input
                   type="text"
@@ -302,24 +304,24 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   placeholder="範例: 60.45"
                   onChange={(e) => handleDecimalInput(e.target.value, 'weight')}
                   onBlur={() => handleBlur('weight')}
-                  className="w-full outline-none"
+                  className="w-full outline-none bg-transparent text-slate-900 dark:text-gray-100"
                   required
                 />
               </div>
               {getWeightError() && (
-                <p className="text-red-500 text-xs mt-1">{getWeightError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getWeightError()}</p>
               )}
             </div>
 
             {/* BMI Display with Progress Bar - left-aligned vertical layout */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
-              <p className="text-xs font-semibold text-slate-500 mb-3">體重數值 (BMI)</p>
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 p-6 rounded-xl border border-emerald-200 dark:border-emerald-700 transition-colors duration-200">
+              <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 mb-3">體重數值 (BMI)</p>
               
               {/* BMI Number - large and bold */}
               {bmiValue ? (
                 <p className={`text-4xl font-bold ${getBMICategory(bmiValue).color} mb-1`}>{bmiValue}</p>
               ) : (
-                <p className="text-sm text-slate-400" style={{ fontSize: '14px', marginBottom: '12px' }}>請填寫身高體重計算</p>
+                <p className="text-sm text-slate-400 dark:text-gray-500" style={{ fontSize: '14px', marginBottom: '12px' }}>請填寫身高體重計算</p>
               )}
               
               {/* Category label */}
@@ -329,7 +331,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
               {/* Tip text - only when BMI available */}
               {bmiValue && (
-                <p className="text-sm text-slate-600">{getBMIDescription(bmiValue)}</p>
+                <p className="text-sm text-slate-600 dark:text-gray-300">{getBMIDescription(bmiValue)}</p>
               )}
             </div>
           </div>
@@ -338,7 +340,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 3 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">活動量等級</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">活動量等級</label>
               <div className="space-y-3">
                 {[
                   { val: 'sedentary', label: '久坐 (辦公室工作)' },
@@ -350,10 +352,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={opt.val}
                     onClick={() => handleChange('activityLevel', opt.val)}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium transition-colors duration-200 ${
                       formData.activityLevel === opt.val
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                        : 'border-slate-100 bg-white text-slate-500'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                        : 'border-slate-100 dark:border-gray-600 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400'
                     }`}
                   >
                     {opt.label}
@@ -367,7 +369,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 4 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">您的目標</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">您的目標</label>
               <div className="space-y-3">
                 {[
                   { val: 'lose', label: '減重' },
@@ -377,10 +379,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   <button
                     key={opt.val}
                     onClick={() => handleChange('goal', opt.val)}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium ${
+                    className={`w-full px-4 py-3 rounded-xl border-2 text-left font-medium transition-colors duration-200 ${
                       formData.goal === opt.val
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                        : 'border-slate-100 bg-white text-slate-500'
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                        : 'border-slate-100 dark:border-gray-600 bg-white dark:bg-gray-800 text-slate-500 dark:text-gray-400'
                     }`}
                   >
                     {opt.label}
@@ -394,9 +396,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {step === 5 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">目標體重 (kg)<span className="text-red-500">*</span></label>
-              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
-                getTargetWeightError() ? 'border-red-500' : 'border-slate-200'
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">目標體重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
+              <div className={`flex items-center bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 transition-colors duration-200 ${
+                getTargetWeightError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
               }`}>
                 <input
                   type="text"
@@ -404,19 +406,19 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   placeholder="範例: 55.50"
                   onChange={(e) => handleDecimalInput(e.target.value, 'targetWeight')}
                   onBlur={() => handleBlur('targetWeight')}
-                  className="w-full outline-none"
+                  className="w-full outline-none bg-transparent text-slate-900 dark:text-gray-100"
                   required
                 />
               </div>
               {getTargetWeightError() && (
-                <p className="text-red-500 text-xs mt-1">{getTargetWeightError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getTargetWeightError()}</p>
               )}
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">預計每週減重 (kg/週)<span className="text-red-500">*</span></label>
-              <div className={`flex items-center bg-white border rounded-xl px-4 py-3 ${
-                getWeeklyWeightLossError() ? 'border-red-500' : 'border-slate-200'
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">預計每週減重 (kg/週)<span className="text-red-500 dark:text-red-400">*</span></label>
+              <div className={`flex items-center bg-white dark:bg-gray-800 border rounded-xl px-4 py-3 transition-colors duration-200 ${
+                getWeeklyWeightLossError() ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-gray-600'
               }`}>
                 <input
                   type="text"
@@ -424,26 +426,26 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   placeholder="範例: 0.5"
                   onChange={(e) => handleDecimalInput(e.target.value, 'weeklyWeightLoss')}
                   onBlur={() => handleBlur('weeklyWeightLoss')}
-                  className="w-full outline-none"
+                  className="w-full outline-none bg-transparent text-slate-900 dark:text-gray-100"
                   required
                 />
               </div>
               {getWeeklyWeightLossError() && (
-                <p className="text-red-500 text-xs mt-1">{getWeeklyWeightLossError()}</p>
+                <p className="text-red-500 dark:text-red-400 text-xs mt-1">{getWeeklyWeightLossError()}</p>
               )}
             </div>
 
             {/* Display estimated weeks to reach target */}
             {isStep2Valid && isStep4Valid && (
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
-                <p className="text-xs font-semibold text-slate-500 mb-2">預估達成時間</p>
-                <p className="text-2xl font-bold text-blue-700 mb-1">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-6 rounded-xl border border-blue-200 dark:border-blue-700 transition-colors duration-200">
+                <p className="text-xs font-semibold text-slate-500 dark:text-gray-400 mb-2">預估達成時間</p>
+                <p className="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-1">
                   約 {calculateWeeksToTarget()} 週
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-gray-300">
                   從目前 {Number(formData.weight).toFixed(2)} kg 到目標 {Number(formData.targetWeight).toFixed(2)} kg
                 </p>
-                <p className="text-xs text-slate-500 mt-2">
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">
                   需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
                   每週減 {Number(formData.weeklyWeightLoss).toFixed(2)} kg
                 </p>
@@ -455,7 +457,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* 底部按鈕區域 - 固定在底部 */}
-      <div className="bg-white border-t border-slate-100 p-6 max-w-md mx-auto w-full">
+      <div className="bg-white dark:bg-gray-900 p-6 max-w-md mx-auto w-full transition-colors duration-200">
         <div className="flex gap-3">
           {step > 1 && (
             <Button

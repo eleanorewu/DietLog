@@ -2,6 +2,7 @@ export type Gender = 'male' | 'female';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'veryActive';
 export type Goal = 'lose' | 'maintain' | 'gain';
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type Theme = 'light' | 'dark';
 
 export interface UserProfile {
   name: string;
@@ -18,6 +19,7 @@ export interface UserProfile {
   targetProtein: number;
   targetFat: number;
   targetCarbs: number;
+  theme?: Theme; // 主題設定
 }
 
 export interface FoodLog {

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
 import { SwipeableItem } from './SwipeableItem';
 import { Dialog } from './Dialog';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface DashboardProps {
   user: UserProfile;
@@ -29,6 +30,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSettings,
   onOpenCalendar
 }) => {
+  // 使用主題
+  const { theme } = useTheme();
+  
   // Dialog 狀態管理
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [foodToDelete, setFoodToDelete] = React.useState<string | null>(null);
@@ -64,7 +68,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
     { name: '剩餘', value: Math.max(0, remaining) },
   ];
 
-  const COLORS = isOver ? ['#EF4444', '#f3f4f6'] : ['#10B981', '#f3f4f6'];
+  // 根據主題動態設置圖表顏色
+  const remainingColor = theme === 'dark' ? '#374151' : '#f3f4f6'; // dark: gray-700, light: gray-100
+  const COLORS = isOver ? ['#EF4444', remainingColor] : ['#10B981', remainingColor];
 
   const MacroBar = ({
     label,
@@ -84,11 +90,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
     return (
       <div className="flex flex-col items-center justify-center min-w-0">
-        <div className="text-xs text-slate-500 font-medium text-center mb-2">
+        <div className="text-xs text-slate-500 dark:text-gray-400 font-medium text-center mb-2">
           <div className="leading-tight break-words">{label}</div>
         </div>
 
-        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
+        <div className="w-full h-2 bg-slate-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
           <div
             className={`h-full rounded-full transition-all duration-300 ${barColorClass}`}
             style={{ width: `${percent}%` }}
@@ -115,8 +121,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return (
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-bold text-slate-800">{title}</h3>
-          <span className="text-xs font-bold text-emerald-600">{cals} kcal</span>
+          <h3 className="font-bold text-slate-800 dark:text-gray-200">{title}</h3>
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{cals} kcal</span>
         </div>
         <div className="space-y-2">
           {meals.map((meal) => (
@@ -127,30 +133,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               <div 
                 onClick={() => !isFutureDate_flag && onEditFood(meal)}
-                className={`bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center transition-transform group ${
+                className={`bg-white dark:bg-gray-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-gray-600 flex items-center transition-all duration-200 group overflow-hidden ${
                   isFutureDate_flag 
                     ? 'opacity-60 cursor-not-allowed' 
-                    : 'active:scale-[0.98] cursor-pointer hover:bg-slate-50'
+                    : 'active:scale-[0.98] cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-600'
                 }`}
               >
-                <div className="w-11 h-11 rounded-lg bg-slate-100 mr-2.5 overflow-hidden flex-shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-slate-100 dark:bg-gray-600 mr-2.5 overflow-hidden flex-shrink-0">
                   {meal.photoUrl ? (
                     <img src={meal.photoUrl} alt={meal.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                    <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-gray-500">
                       <Image size={16} />
                     </div>
                   )}
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-medium text-slate-800 text-sm">{meal.name}</h4>
-                  <p className="text-xs text-slate-500 flex items-center gap-2">
+                  <h4 className="font-medium text-slate-800 dark:text-gray-200 text-sm">{meal.name}</h4>
+                  <p className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-2">
                     <span>{meal.calories} kcal</span>
-                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-300 dark:text-gray-600">|</span>
                     <span>蛋:{meal.protein}g</span>
-                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-300 dark:text-gray-600">|</span>
                     <span>碳:{meal.carbs}g</span>
-                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-300 dark:text-gray-600">|</span>
                     <span>脂:{meal.fat}g</span>
                   </p>
                 </div>
@@ -163,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       setFoodToDelete(meal.id);
                       setDeleteDialogOpen(true);
                     }}
-                    className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-lg"
+                    className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                     title="刪除記錄"
                   >
                     <Trash2 size={16} className="text-red-500" />
@@ -175,10 +181,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* 新增按鈕 - 始終顯示在列表下方 */}
           <div 
             onClick={!isFutureDate_flag ? () => onAddFood(type) : undefined}
-            className={`border border-dashed border-slate-300 rounded-xl p-3 text-center text-sm ${
+            className={`border border-dashed border-slate-300 dark:border-gray-600 rounded-xl p-3 text-center text-sm transition-colors duration-200 ${
               isFutureDate_flag 
-                ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
-                : 'text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors'
+                ? 'bg-slate-50 dark:bg-gray-900 text-slate-300 dark:text-gray-600 cursor-not-allowed' 
+                : 'text-slate-400 dark:text-gray-400 cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-700'
             }`}
           >
             + 新增{title}
@@ -190,24 +196,24 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="pb-20 animate-fadeIn">
-      <div className="bg-white  mb-2 pb-2 pt-4 px-2 sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 mb-2 pb-2 pt-4 px-2 sticky top-0 z-10 transition-colors duration-200">
         <div className="flex justify-between items-center mb-3 mx-2 ">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-slate-800">
+            <span className="font-bold text-xl text-slate-800 dark:text-gray-200">
               {selectedDate.split('-')[0]}年{selectedDate.split('-')[1]}月{selectedDate.split('-')[2]}日
             </span>
           </div>
           <div className="flex items-center gap-1">
             <button 
               onClick={onOpenCalendar}
-              className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-600 dark:text-gray-300 transition-colors duration-200"
               title="打開日曆"
             >
               <Calendar size={20} />
             </button>
             <button 
               onClick={onOpenSettings}
-              className="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+              className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-600 dark:text-gray-300 transition-colors duration-200"
             >
               <Settings size={20} />
             </button>
@@ -217,7 +223,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex items-center justify-between gap-1">
           <button 
             onClick={() => setDisplayWeekStart(getPreviousWeekStart(displayWeekStart))}
-            className="p-1.5 hover:bg-white rounded-lg transition-colors text-slate-600 flex-shrink-0"
+            className="p-1.5 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors duration-200 text-slate-600 dark:text-gray-300 flex-shrink-0"
           >
             <ChevronLeft size={20} />
           </button>
@@ -235,14 +241,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <button
                   key={date}
                   onClick={() => onDateChange(date)}
-                  className={`flex flex-col items-center rounded-lg transition-all text-xs font-semibold relative overflow-hidden flex-1 ${
+                  className={`flex flex-col items-center rounded-lg transition-all duration-200 text-xs font-semibold relative overflow-hidden flex-1 ${
                     isSelected
                       ? 'bg-emerald-500 text-white shadow-md'
                       : isFuture
-                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-50'
+                      ? 'bg-slate-100 dark:bg-gray-700 text-slate-400 dark:text-gray-500 cursor-not-allowed opacity-50'
                       : isCurrentDay
-                      ? 'bg-slate-50 text-emerald-600'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-slate-50 dark:bg-gray-700 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-slate-50 dark:bg-gray-700 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-600'
                   }`}
                   disabled={isFuture}
                   style={{ height: '48px', paddingTop: '6px', paddingBottom: '4px' }}
@@ -260,10 +266,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button 
             onClick={() => setDisplayWeekStart(getNextWeekStart(displayWeekStart))}
             disabled={isNextWeekDisabled}
-            className={`p-1.5 rounded-lg transition-colors flex-shrink-0 ${
+            className={`p-1.5 rounded-lg transition-colors duration-200 flex-shrink-0 ${
               isNextWeekDisabled 
-                ? 'text-slate-300 cursor-not-allowed' 
-                : 'text-slate-600 hover:bg-white'
+                ? 'text-slate-300 dark:text-gray-600 cursor-not-allowed' 
+                : 'text-slate-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700'
             }`}
           >
             <ChevronRight size={20} />
@@ -273,35 +279,35 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {isFutureDate(selectedDate) ? (
         <div className="flex-1 flex flex-col items-center justify-center px-4 py-16">
-          <div className="bg-white p-6 text-center max-w-xs">
-            <Lock size={48} className="text-amber-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-800 mb-2">未來日期無法新增紀錄</h2>
-            <p className="text-sm text-slate-500">只能紀錄當日及過去的飲食</p>
+          <div className="bg-white dark:bg-gray-700 p-6 text-center max-w-xs rounded-xl transition-colors duration-200">
+            <Lock size={48} className="text-amber-600 dark:text-amber-400 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-800 dark:text-gray-200 mb-2">未來日期無法新增紀錄</h2>
+            <p className="text-sm text-slate-500 dark:text-gray-400">只能紀錄當日及過去的飲食</p>
           </div>
         </div>
       ) : (
         <>
-          <div className="bg-white mx-4 p-2 mb-4">
+          <div className="bg-white dark:bg-gray-900 mx-4 p-2 mb-4 transition-colors duration-200">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-slate-800">今日攝取概況</h2>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-gray-200">今日攝取概況</h2>
             </div>
 
             {/* 每日目標與 TDEE 資訊 */}
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
-                <p className="text-xs text-slate-500 font-medium mb-1">已攝取</p>
-                <p className="text-lg font-bold text-emerald-600">{totalCalories}</p>
-                <p className="text-xs text-slate-500 font-medium">kcal</p>
+              <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-colors duration-200">
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">已攝取</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{totalCalories}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">kcal</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
-                <p className="text-xs text-slate-500 font-medium mb-1">每日目標</p>
-                <p className="text-lg font-bold text-slate-700">{user.targetCalories}</p>
-                <p className="text-xs text-slate-500 font-medium">kcal</p>
+              <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-colors duration-200">
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">每日目標</p>
+                <p className="text-lg font-bold text-slate-700 dark:text-gray-200">{user.targetCalories}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">kcal</p>
               </div>
-              <div className="bg-slate-50 rounded-xl p-2.5 flex flex-col items-center justify-center text-center">
-                <p className="text-xs text-slate-500 font-medium mb-1">TDEE</p>
-                <p className="text-lg font-bold text-slate-700">{user.tdee}</p>
-                <p className="text-xs text-slate-500 font-medium">kcal</p>
+              <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-colors duration-200">
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">TDEE</p>
+                <p className="text-lg font-bold text-slate-700 dark:text-gray-200">{user.tdee}</p>
+                <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">kcal</p>
               </div>
             </div>
 

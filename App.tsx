@@ -7,10 +7,12 @@ import { MonthCalendarView } from './components/MonthCalendarView';
 import { WeightTracking } from './components/WeightTracking';
 import { WeightDataList } from './components/WeightDataList';
 import { CalorieTracking } from './components/CalorieTracking';
-import { FoodLog, UserProfile, WeightRecord } from './types';
+import { ThemeToggle } from './components/ThemeToggle';
+import { FoodLog, UserProfile, WeightRecord, Theme } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 import { Dialog } from './components/Dialog';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Simple mock for local storage persistence
 const STORAGE_KEY_USER = 'dietlog_user_v1';
@@ -48,6 +50,9 @@ function App() {
       }
       if (!parsedUser.weeklyWeightLoss) {
         parsedUser.weeklyWeightLoss = 0.5; // Default: 0.5kg per week
+      }
+      if (!parsedUser.theme) {
+        parsedUser.theme = 'light'; // Default: light theme
       }
       
       setUser(parsedUser);
@@ -204,6 +209,13 @@ function App() {
     setWeightRecords(prev => prev.filter(record => record.id !== recordId));
   };
 
+  const handleThemeChange = (newTheme: Theme) => {
+    if (user) {
+      const updatedUser = { ...user, theme: newTheme };
+      setUser(updatedUser);
+    }
+  };
+
   const handleReset = () => {
     setResetDialogOpen(true);
   };
@@ -221,16 +233,15 @@ function App() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen">
-      {/* Mobile container - fixed size on desktop/tablet, full screen on mobile */}
-      <div className="
-        md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
-        max-md:w-full max-md:h-screen max-md:rounded-none
-        bg-white overflow-hidden relative flex flex-col
-      ">
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar w-full">
+    <ThemeProvider initialTheme={user?.theme || 'light'}>
+      <div className="bg-gray-100 dark:bg-gray-800 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
+        {/* Mobile container - fixed size on desktop/tablet, full screen on mobile */}
+        <div className="
+          md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
+          max-md:w-full max-md:h-screen max-md:rounded-none
+          bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-200
+        ">{/* Main Content Area */}
+          <div className="flex-1 overflow-y-auto no-scrollbar w-full">
           
           {view === 'onboarding' && (
             <Onboarding onComplete={handleOnboardingComplete} />
@@ -282,43 +293,46 @@ function App() {
           )}
 
           {view === 'settings' && user && (
-             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 overflow-y-auto no-scrollbar">
+             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 dark:bg-gray-900 overflow-y-auto no-scrollbar transition-colors duration-200">
                 <div className="flex items-center mb-6">
-                   <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-slate-600 rounded-full hover:bg-slate-200">
+                   <button onClick={() => setView('dashboard')} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
                       <LogOut className="rotate-180" size={24}/>
                    </button>
-                   <h1 className="text-xl font-bold ml-2">設定</h1>
+                   <h1 className="text-xl font-bold ml-2 text-slate-900 dark:text-gray-100">設定</h1>
                 </div>
 
                 <div className="space-y-4">
+                  {/* Theme Toggle Section */}
+                  <ThemeToggle user={user} onThemeChange={handleThemeChange} />
+                  
                   {/* Profile Section */}
-                  <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
                     <div className="flex justify-between items-center mb-4">
-                       <h3 className="text-base font-bold text-slate-700">我的個人檔案</h3>
+                       <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">我的個人檔案</h3>
                        <button 
                          onClick={() => setView('edit-profile')}
-                         className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                         className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
                        >
-                         <SquarePen className="text-slate-600" size={16} />
+                         <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
                        </button>
                     </div>
                     
                     <div className="space-y-3">
                        <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">年齡</span>
-                         <span className="font-bold text-slate-900">{user.age} 歲</span>
+                         <span className="text-sm text-slate-600 dark:text-gray-400">年齡</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.age} 歲</span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">身高</span>
-                         <span className="font-bold text-slate-900">{user.height} cm</span>
+                         <span className="text-sm text-slate-600 dark:text-gray-400">身高</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.height} cm</span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">體重</span>
-                         <span className="font-bold text-slate-900">{user.weight} kg</span>
+                         <span className="text-sm text-slate-600 dark:text-gray-400">體重</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.weight} kg</span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">活動量等級</span>
-                         <span className="font-bold text-slate-900">
+                         <span className="text-sm text-slate-600 dark:text-gray-400">活動量等級</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">
                            {user.activityLevel === 'sedentary' && '久坐'}
                            {user.activityLevel === 'light' && '輕度活動'}
                            {user.activityLevel === 'moderate' && '中度活動'}
@@ -327,20 +341,20 @@ function App() {
                          </span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">目標</span>
-                         <span className="font-bold text-slate-900">
+                         <span className="text-sm text-slate-600 dark:text-gray-400">目標</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">
                            {user.goal === 'lose' && '減重'}
                            {user.goal === 'maintain' && '維持體重'}
                            {user.goal === 'gain' && '增肌'}
                          </span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">目標體重</span>
-                         <span className="font-bold text-slate-900">{user.targetWeight.toFixed(2)} kg</span>
+                         <span className="text-sm text-slate-600 dark:text-gray-400">目標體重</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.targetWeight.toFixed(2)} kg</span>
                       </div>
                       <div className="flex justify-between items-center">
-                         <span className="text-sm text-slate-600">每週減重</span>
-                         <span className="font-bold text-slate-900">{user.weeklyWeightLoss.toFixed(2)} kg</span>
+                         <span className="text-sm text-slate-600 dark:text-gray-400">每週減重</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.weeklyWeightLoss.toFixed(2)} kg</span>
                       </div>
                     </div>
                   </div>
@@ -361,12 +375,12 @@ function App() {
 
                   <button 
                     onClick={handleReset}
-                    className="w-full flex items-center justify-center p-4 bg-red-50 text-red-600 rounded-xl font-medium hover:bg-red-100 transition-colors"
+                    className="w-full flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
                   >
                     <Trash2 size={20} className="mr-2" />
                     重置所有資料
                   </button>
-                  <p className="text-center text-xs text-slate-400 mt-4 pb-4">DietLog v1.2</p>
+                  <p className="text-center text-xs text-slate-400 dark:text-gray-500 mt-4 pb-4">DietLog v1.2</p>
                 </div>
              </div>
           )}
@@ -394,7 +408,8 @@ function App() {
         cancelText="取消"
         isDangerous={true}
       />
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }
 
