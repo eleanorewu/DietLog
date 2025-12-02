@@ -31,27 +31,67 @@ http://dietlog-pwa.vercel.app
 ### 2.1 技術棧
 
 - **前端框架**：React 19.2.0
+- **狀態管理**：React Context API（主題管理）
 - **建構工具**：Vite 6.2.0
 - **程式語言**：TypeScript 5.8.2
+- **樣式方案**：Tailwind CSS（CDN，支援 dark mode）
 - **圖表庫**：Recharts 3.5.0
-- **icon 庫**：Lucide React 0.554.0
+- **圖示庫**：Lucide React 0.554.0
 - **PWA 支援**：vite-plugin-pwa 1.1.0
 - **圖片處理**：browser-image-compression 2.0.2
 
 ### 2.2 應用架構
 
-- **單頁應用程式（SPA）**
+- **單頁應用程式（SPA）**：React-based 無路由單頁設計
+- **狀態管理**：React Hooks + Context API
 - **本地儲存（LocalStorage）**：資料儲存於瀏覽器本地
-- **響應式設計**：適配桌面與行動裝置
+- **響應式設計**：適配桌面與行動裝置（Tailwind CSS）
 - **離線優先**：支援 PWA 離線功能
+- **主題系統**：Light/Dark Mode 自動偵測與持久化
 
 ### 2.3 儲存架構
 
-使用 LocalStorage 儲存三組主要資料：
+使用 LocalStorage 儲存四組主要資料：
 
-- `dietlog_user_v1`：使用者個人檔案
-- `dietlog_logs_v1`：飲食記錄
-- `dietlog_weight_records_v1`：體重記錄
+- `dietlog_user_v1`：使用者個人檔案（包含營養目標、身體數據等）
+- `dietlog_logs_v1`：飲食記錄（每日飲食條目與營養資訊）
+- `dietlog_weight_records_v1`：體重記錄（體重追蹤資料）
+- `theme`：主題偏好設定（'light' | 'dark'，獨立儲存以優化載入速度）
+
+### 2.4 專案結構
+
+```
+dietlog/
+├── components/           # React 組件
+│   ├── Button.tsx       # 通用按鈕組件（4 種變體）
+│   ├── CalorieTracking.tsx  # 熱量追蹤圖表
+│   ├── Dashboard.tsx    # 主頁面儀表板
+│   ├── Dialog.tsx       # 確認對話框
+│   ├── EditProfile.tsx  # 編輯個人檔案
+│   ├── FoodEntry.tsx    # 飲食記錄表單
+│   ├── MonthCalendarView.tsx  # 月曆檢視
+│   ├── Onboarding.tsx   # 使用者引導流程（5 步驟）
+│   ├── SwipeableItem.tsx  # 滑動刪除組件
+│   ├── ThemeToggle.tsx  # 主題切換開關
+│   ├── WeightDataList.tsx  # 體重記錄列表
+│   └── WeightTracking.tsx  # 體重追蹤圖表
+├── contexts/            # React Context
+│   └── ThemeContext.tsx # 主題狀態管理
+├── public/              # 靜態資源
+│   ├── icons/          # PWA 圖示
+│   └── manifest.json   # PWA Manifest
+├── scripts/             # 工具腳本
+│   └── generate-icons.js  # 圖示生成器
+├── App.tsx              # 主應用組件
+├── index.tsx            # 應用入口
+├── types.ts             # TypeScript 類型定義
+├── utils.ts             # 工具函數（計算 BMI、TDEE、營養素等）
+├── index.html           # HTML 模板
+├── vite.config.ts       # Vite 配置
+├── tsconfig.json        # TypeScript 配置
+├── package.json         # 專案依賴
+└── README.md            # 產品規格書
+```
 
 ---
 
@@ -291,11 +331,13 @@ interface FoodLog {
 
 **深色模式切換**
 
-- 主題切換開關
+- 精美的 Toggle Switch 切換開關
 - 太陽圖示（淺色模式）/ 月亮圖示（深色模式）
-- 平滑的滑動動畫效果
-- 顯示當前主題狀態
-- 設定自動保存並在下次啟動時保留
+- 平滑的滑動動畫效果與顏色過渡
+- 即時顯示當前主題狀態
+- 設定自動保存至 localStorage
+- 下次啟動時自動載入使用者偏好
+- 首次訪問時自動適應系統設定
 
 **個人檔案區塊**
 
@@ -890,24 +932,35 @@ const yDomain = [
 
 - **技術實現**：
   - React Context API 管理全局主題狀態
-  - Tailwind CSS `dark:` 修飾符實現樣式切換
+  - Tailwind CSS `dark:` 修飾符（class 模式）實現樣式切換
   - 主題狀態同步到 `document.documentElement.classList`
+  - 獨立的 ThemeContext 與 UserProfile 雙軌管理
 - **狀態管理**：
   - ThemeContext 提供主題狀態與切換函數
   - ThemeProvider 包裹整個應用
-  - 主題偏好儲存於 UserProfile.theme
+  - 主題偏好優先使用 localStorage 獨立儲存
+  - 同步更新 UserProfile.theme（用於未來擴充）
+- **智慧初始化**：
+  - **優先級 1**：localStorage 儲存的使用者偏好設定
+  - **優先級 2**：系統偏好設定檢測（`prefers-color-scheme`）
+  - **優先級 3**：預設為淺色模式
+  - 首次訪問時自動適應系統深色/淺色模式
+- **持久化儲存**：
+  - 使用 `localStorage.setItem('theme', 'light'|'dark')` 獨立儲存
+  - 主題切換時即時保存
+  - 頁面重新整理後自動恢復使用者選擇
+  - 跨瀏覽器分頁同步（未來可擴充）
 - **UI 組件**：
-  - 精美的切換開關（Toggle Switch）
-  - 太陽/月亮圖標視覺化當前模式
-  - 平滑的滑動動畫效果
-- **自動保存**：
-  - 切換主題時自動更新 UserProfile
-  - 儲存至 LocalStorage 持久化
-  - 下次啟動時自動載入用戶偏好
-- **全局支持**：
-  - 所有頁面和組件完整適配
-  - 顏色過渡動畫（transition-colors duration-200）
-  - 保持品牌色一致性（Emerald 綠色）
+  - 精美的切換開關（Toggle Switch）位於設定頁面
+  - 太陽圖示（淺色模式）/ 月亮圖示（深色模式）視覺化當前狀態
+  - 平滑的滑動動畫效果（slate-600 深色背景）
+  - 即時切換反饋
+- **全局支援**：
+  - 所有頁面和組件完整適配（12+ 組件）
+  - 顏色過渡動畫（`transition-colors duration-200`）
+  - 保持品牌色一致性（Emerald 綠色系）
+  - 圖表動態顏色調整（Recharts 主題感知）
+  - 表單輸入框深色模式優化
 
 ---
 
@@ -1057,7 +1110,7 @@ const yDomain = [
 
 ## 13. 版本資訊
 
-### 當前版本：v1.2
+### 當前版本：v1.3
 
 **主要功能**
 
@@ -1067,8 +1120,19 @@ const yDomain = [
 - ✅ 體重記錄與趨勢圖
 - ✅ 月曆與週曆檢視
 - ✅ 圖片上傳與壓縮
+- ✅ 深色模式（Dark Mode）與主題持久化
+- ✅ 系統偏好設定自動偵測
 - ✅ PWA 支援與離線功能
 - ✅ 響應式設計
+
+**最新更新（v1.3 - 2025/12/02）**
+
+- 🎨 新增完整深色模式支援
+- 💾 主題偏好 localStorage 持久化
+- 🌓 自動偵測系統色彩模式偏好
+- ✨ 所有組件深色模式適配（12+ 組件）
+- 📊 圖表動態主題顏色調整
+- 🎯 優化輸入框深色模式顯示
 
 **已知限制**
 
@@ -1217,4 +1281,4 @@ TDEE = BMR × 活動係數
 
 ---
 
-_此規格書最後更新日期：2025 年 12 月 1 日_
+_此規格書最後更新日期：2025 年 12 月 2 日_
