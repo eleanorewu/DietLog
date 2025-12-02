@@ -100,7 +100,7 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
       
       {/* 可滑動的內容 */}
       <div
-        className="relative bg-white"
+        className="relative overflow-hidden"
         style={{
           transform: `translateX(${translateX}px)`,
           transition: isSwiping ? 'none' : 'transform 0.3s ease-out',

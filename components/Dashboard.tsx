@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash
 import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../utils';
 import { SwipeableItem } from './SwipeableItem';
 import { Dialog } from './Dialog';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface DashboardProps {
   user: UserProfile;
@@ -29,6 +30,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOpenSettings,
   onOpenCalendar
 }) => {
+  // 使用主題
+  const { theme } = useTheme();
+  
   // Dialog 狀態管理
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [foodToDelete, setFoodToDelete] = React.useState<string | null>(null);
@@ -64,7 +68,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
     { name: '剩餘', value: Math.max(0, remaining) },
   ];
 
-  const COLORS = isOver ? ['#EF4444', '#f3f4f6'] : ['#10B981', '#f3f4f6'];
+  // 根據主題動態設置圖表顏色
+  const remainingColor = theme === 'dark' ? '#374151' : '#f3f4f6'; // dark: gray-700, light: gray-100
+  const COLORS = isOver ? ['#EF4444', remainingColor] : ['#10B981', remainingColor];
 
   const MacroBar = ({
     label,
@@ -127,7 +133,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             >
               <div 
                 onClick={() => !isFutureDate_flag && onEditFood(meal)}
-                className={`bg-white dark:bg-gray-700 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-gray-600 flex items-center transition-all duration-200 group ${
+                className={`bg-white dark:bg-gray-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-gray-600 flex items-center transition-all duration-200 group overflow-hidden ${
                   isFutureDate_flag 
                     ? 'opacity-60 cursor-not-allowed' 
                     : 'active:scale-[0.98] cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-600'
@@ -177,7 +183,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             onClick={!isFutureDate_flag ? () => onAddFood(type) : undefined}
             className={`border border-dashed border-slate-300 dark:border-gray-600 rounded-xl p-3 text-center text-sm transition-colors duration-200 ${
               isFutureDate_flag 
-                ? 'bg-slate-50 dark:bg-gray-800 text-slate-300 dark:text-gray-600 cursor-not-allowed' 
+                ? 'bg-slate-50 dark:bg-gray-900 text-slate-300 dark:text-gray-600 cursor-not-allowed' 
                 : 'text-slate-400 dark:text-gray-400 cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-700'
             }`}
           >
@@ -190,7 +196,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="pb-20 animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 mb-2 pb-2 pt-4 px-2 sticky top-0 z-10 transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-900 mb-2 pb-2 pt-4 px-2 sticky top-0 z-10 transition-colors duration-200">
         <div className="flex justify-between items-center mb-3 mx-2 ">
           <div className="flex items-center space-x-2">
             <span className="font-bold text-xl text-slate-800 dark:text-gray-200">
@@ -281,7 +287,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-gray-800 mx-4 p-2 mb-4 transition-colors duration-200">
+          <div className="bg-white dark:bg-gray-900 mx-4 p-2 mb-4 transition-colors duration-200">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold text-slate-800 dark:text-gray-200">今日攝取概況</h2>
             </div>

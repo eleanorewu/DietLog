@@ -234,12 +234,12 @@ function App() {
 
   return (
     <ThemeProvider initialTheme={user?.theme || 'light'}>
-      <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
+      <div className="bg-gray-100 dark:bg-gray-800 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
         {/* Mobile container - fixed size on desktop/tablet, full screen on mobile */}
         <div className="
           md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
           max-md:w-full max-md:h-screen max-md:rounded-none
-          bg-white dark:bg-gray-800 overflow-hidden relative flex flex-col transition-colors duration-200
+          bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-200
         ">{/* Main Content Area */}
           <div className="flex-1 overflow-y-auto no-scrollbar w-full">
           
@@ -306,7 +306,7 @@ function App() {
                   <ThemeToggle user={user} onThemeChange={handleThemeChange} />
                   
                   {/* Profile Section */}
-                  <div className="bg-white dark:bg-gray-700 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
                     <div className="flex justify-between items-center mb-4">
                        <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">我的個人檔案</h3>
                        <button 

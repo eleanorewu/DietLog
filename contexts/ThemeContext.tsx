@@ -22,13 +22,35 @@ interface ThemeProviderProps {
   initialTheme?: Theme;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialTheme = 'light' }) => {
-  const [theme, setThemeState] = useState<Theme>(initialTheme);
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialTheme }) => {
+  // 初始化主題：優先使用 localStorage，其次使用 initialTheme，最後使用系統設定
+  const [theme, setThemeState] = useState<Theme>(() => {
+    // 1. 檢查 localStorage 是否有儲存的主題
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+    
+    // 2. 如果有傳入 initialTheme，使用它
+    if (initialTheme) {
+      return initialTheme;
+    }
+    
+    // 3. 否則根據系統設定決定
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    
+    return 'light';
+  });
 
   useEffect(() => {
     // Apply theme to document root
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
+    
+    // Save theme to localStorage
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

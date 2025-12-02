@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { WeightRecord, UserProfile } from '../types';
 import { SquarePen, List } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface WeightTrackingProps {
   user: UserProfile;
@@ -16,6 +17,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   onUpdateWeight,
   onNavigateToDataList
 }) => {
+  const { theme } = useTheme();
   const [isEditingWeight, setIsEditingWeight] = useState(false);
   const [weightInput, setWeightInput] = useState(user.weight.toString());
 
@@ -66,20 +68,25 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   const weights = chartData.map(d => d.weight);
   const minWeight = Math.min(...weights, user.targetWeight);
   const maxWeight = Math.max(...weights, user.targetWeight);
-  const yAxisPadding = (maxWeight - minWeight) * 0.1 || 2; // 至少2kg的padding
+  const yAxisPadding = (maxWeight - minWeight) * 0.1 || 1;
+  
+  // 根據主題設置圖表顏色
+  const gridColor = theme === 'dark' ? '#374151' : '#f1f5f9'; // dark: gray-700, light: slate-100
+  const axisStroke = theme === 'dark' ? '#4B5563' : '#cbd5e1'; // dark: gray-600, light: slate-300
+  const tickColor = theme === 'dark' ? '#9CA3AF' : '#64748b'; // dark: gray-400, light: slate-500
 
   return (
     <div className="space-y-4">
       {/* Current Weight Card */}
-      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-slate-700"> 當前體重</h3>
+          <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">當前體重</h3>
           {!isEditingWeight && (
             <button 
               onClick={() => setIsEditingWeight(true)}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
             >
-              <SquarePen className="text-slate-600" size={16} />
+              <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
             </button>
           )}
         </div>
@@ -95,22 +102,22 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                   if (e.key === 'Enter') handleSaveWeight();
                   if (e.key === 'Escape') handleCancelWeightEdit();
                 }}
-                className="flex-1 bg-white border-2 border-green-400 rounded-lg p-2 text-lg font-bold text-slate-700 outline-none"
+                className="flex-1 bg-white dark:bg-gray-800 border-2 border-green-400 dark:border-green-500 rounded-lg p-2 text-lg font-bold text-slate-700 dark:text-gray-100 outline-none transition-colors duration-200"
                 placeholder="輸入體重"
                 autoFocus
               />
-              <span className="text-sm font-medium text-slate-600">kg</span>
+              <span className="text-sm font-medium text-slate-600 dark:text-gray-400">kg</span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={handleSaveWeight}
-                className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700 transition-colors"
+                className="flex-1 bg-green-600 dark:bg-green-700 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700 dark:hover:bg-green-800 transition-colors duration-200"
               >
                 儲存並更新
               </button>
               <button
                 onClick={handleCancelWeightEdit}
-                className="flex-1 bg-white text-slate-600 py-2 rounded-lg font-medium text-sm border border-slate-200 hover:bg-slate-50 transition-colors"
+                className="flex-1 bg-white dark:bg-gray-600 text-slate-600 dark:text-gray-200 py-2 rounded-lg font-medium text-sm border border-slate-200 dark:border-gray-500 hover:bg-slate-50 dark:hover:bg-gray-500 transition-colors duration-200"
               >
                 取消
               </button>
@@ -119,30 +126,30 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
         ) : (
           <div>
             <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-2xl font-bold text-green-700">
+              <span className="text-2xl font-bold text-green-700 dark:text-green-500">
                 {user.weight.toFixed(2)}
               </span>
-              <span className="text-lg font-medium text-slate-600">kg</span>
+              <span className="text-lg font-medium text-slate-600 dark:text-gray-400">kg</span>
             </div>
             
-            <div className="pt-3 border-t border-slate-100">
+            <div className="pt-3 border-t border-slate-100 dark:border-gray-600">
               {weightProgress > 0 ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">還需減重</span>
-                    <span className="font-bold text-orange-600">{totalWeightToLose.toFixed(2)} kg</span>
+                    <span className="text-sm text-slate-600 dark:text-gray-400">還需減重</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">{totalWeightToLose.toFixed(2)} kg</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">預估達成時間</span>
-                    <span className="font-bold text-green-600">約 {estimatedWeeks} 週</span>
+                    <span className="text-sm text-slate-600 dark:text-gray-400">預估達成時間</span>
+                    <span className="font-bold text-green-600 dark:text-green-400">約 {estimatedWeeks} 週</span>
                   </div>
                 </div>
               ) : weightProgress < 0 ? (
-                <p className="text-sm text-green-600 font-medium">
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
                   🎉 已超過目標 {Math.abs(weightProgress).toFixed(2)} kg
                 </p>
               ) : (
-                <p className="text-sm text-green-600 font-medium">
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
                   🎉 已達成目標！
                 </p>
               )}
@@ -153,15 +160,15 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
 
       {/* Weight Trend Chart */}
       {chartData.length > 0 && (
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-slate-700">體重</h3>
+            <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">體重</h3>
             <button 
               onClick={onNavigateToDataList}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
             >
-              <List className="text-slate-600" size={16} />
-              <span className="text-sm font-medium text-slate-600">列表</span>
+              <List className="text-slate-600 dark:text-gray-300" size={16} />
+              <span className="text-sm font-medium text-slate-600 dark:text-gray-300">列表</span>
             </button>
           </div>
           <div className="h-64">
@@ -169,11 +176,11 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
               <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 400), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: chartData.length > 14 ? 50 : 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis 
                       dataKey="displayDate" 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      stroke="#cbd5e1"
+                      tick={{ fontSize: 12, fill: tickColor }}
+                      stroke={axisStroke}
                       interval={0}
                       angle={chartData.length > 14 ? -45 : 0}
                       textAnchor={chartData.length > 14 ? 'end' : 'middle'}
@@ -181,20 +188,20 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                     />
                     <YAxis 
                       domain={[Math.floor(minWeight - yAxisPadding), Math.ceil(maxWeight + yAxisPadding)]}
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      stroke="#cbd5e1"
+                      tick={{ fontSize: 12, fill: tickColor }}
+                      stroke={axisStroke}
                       width={50}
                       tickFormatter={(value) => value.toFixed(2)}
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #e2e8f0',
+                        backgroundColor: theme === 'dark' ? '#1F2937' : '#fff', 
+                        border: `1px solid ${theme === 'dark' ? '#374151' : '#e2e8f0'}`,
                         borderRadius: '8px',
                         fontSize: '12px',
-                        color: '#475569'
+                        color: theme === 'dark' ? '#E5E7EB' : '#475569'
                       }}
-                      labelStyle={{ color: '#475569' }}
+                      labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
                       formatter={(value: number) => [`${value.toFixed(2)} kg`, '體重']}
                     />
                     <ReferenceLine 

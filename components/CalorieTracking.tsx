@@ -1,6 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { FoodLog, UserProfile } from '../types';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CalorieTrackingProps {
   user: UserProfile;
@@ -8,6 +9,7 @@ interface CalorieTrackingProps {
 }
 
 export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) => {
+  const { theme } = useTheme();
   // 計算每天的總卡路里
   const getDailyCalories = () => {
     const dailyData: { [date: string]: number } = {};
@@ -48,25 +50,30 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
   const chartData = prepareChartData();
   // 只要有任何記錄就顯示圖表
   const hasAnyLogs = chartData.length > 0;
+  
+  // 根據主題設置圖表顏色
+  const gridColor = theme === 'dark' ? '#374151' : '#f1f5f9'; // dark: gray-700, light: slate-100
+  const axisStroke = theme === 'dark' ? '#4B5563' : '#cbd5e1'; // dark: gray-600, light: slate-300
+  const tickColor = theme === 'dark' ? '#9CA3AF' : '#64748b'; // dark: gray-400, light: slate-500
 
   return (
     <div className="space-y-4">
       {/* Calorie Chart Card */}
-      <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold text-slate-700">卡路里</h3>
+          <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">卡路里</h3>
         </div>
 
         {/* Daily Target */}
         <div className="flex justify-between items-center mb-3">
-          <span className="text-sm text-slate-600">每日目標</span>
-          <span className="font-bold text-emerald-600">{user.targetCalories} kcal</span>
+          <span className="text-sm text-slate-600 dark:text-gray-400">每日目標</span>
+          <span className="font-bold text-emerald-600 dark:text-emerald-400">{user.targetCalories} kcal</span>
         </div>
 
         {/* TDEE */}
         <div className="flex justify-between items-center mb-4">
-          <span className="text-sm text-slate-600">每日總消耗 (TDEE)</span>
-          <span className="font-bold text-slate-900">{user.tdee} kcal</span>
+          <span className="text-sm text-slate-600 dark:text-gray-400">每日總消耗 (TDEE)</span>
+          <span className="font-bold text-slate-900 dark:text-gray-100">{user.tdee} kcal</span>
         </div>
 
         {/* Bar Chart or Empty State */}
@@ -82,8 +89,8 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 20, right: 0, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
                     <YAxis 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      stroke="#cbd5e1"
+                      tick={{ fontSize: 12, fill: tickColor }}
+                      stroke={axisStroke}
                       width={50}
                     />
                   </BarChart>
@@ -95,11 +102,11 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                 <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 350), height: '100%' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                       <XAxis 
                         dataKey="displayDate" 
-                        tick={{ fontSize: 12, fill: '#64748b' }}
-                        stroke="#cbd5e1"
+                        tick={{ fontSize: 12, fill: tickColor }}
+                        stroke={axisStroke}
                         interval={0}
                         angle={chartData.length > 14 ? -45 : 0}
                         textAnchor={chartData.length > 14 ? 'end' : 'middle'}
@@ -112,24 +119,25 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                       />
                       <Tooltip 
                         contentStyle={{ 
-                          backgroundColor: '#fff', 
-                          border: '1px solid #e2e8f0',
+                          backgroundColor: theme === 'dark' ? '#1F2937' : '#fff', 
+                          border: '1px solid',
+                          borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
                           borderRadius: '8px',
                           fontSize: '12px',
-                          color: '#475569'
+                          color: theme === 'dark' ? '#E5E7EB' : '#475569'
                         }}
-                        labelStyle={{ color: '#475569' }}
+                        labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
                         formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
                       />
                       {/* 目標熱量參考線 */}
                       <ReferenceLine 
                         y={user.targetCalories} 
-                        stroke="#64748b" 
+                        stroke={tickColor} 
                         strokeDasharray="5 5"
                         label={{ 
                           value: '目標', 
                           position: 'insideTopRight',
-                          fill: '#475569', 
+                          fill: tickColor, 
                           fontSize: 12,
                           offset: 10
                         }}

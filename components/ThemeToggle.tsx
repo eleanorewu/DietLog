@@ -18,19 +18,19 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ user, onThemeChange })
   };
 
   return (
-    <div className="bg-white dark:bg-gray-700 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-slate-100 dark:bg-gray-600 rounded-lg transition-colors duration-200">
+          <div className="p-2 rounded-lg transition-colors duration-200">
             {theme === 'light' ? (
-              <Sun className="text-amber-500" size={20} />
+              <Sun className="text-green-500" size={20} />
             ) : (
-              <Moon className="text-blue-400" size={20} />
+              <Moon className="text-green-300" size={20} />
             )}
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">深色模式</h3>
-            <p className="text-xs text-slate-500 dark:text-gray-400">
+            <h3 className="text-xs font-bold text-slate-400">色彩模式</h3>
+            <p className="text-xs font-bold text-slate-600 dark:text-gray-200">
               {theme === 'light' ? '淺色主題' : '深色主題'}
             </p>
           </div>
@@ -40,7 +40,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ user, onThemeChange })
           onClick={handleToggle}
           className={`
             relative w-14 h-7 rounded-full transition-all duration-300 ease-in-out
-            ${theme === 'dark' ? 'bg-emerald-500' : 'bg-slate-300'}
+            ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-300'}
           `}
         >
           <div
