@@ -312,11 +312,25 @@ interface FoodLog {
   - 體重值
   - 刪除按鈕
 
-#### 3.7.3 互動行為
+#### 3.7.3 體重記錄規則
+- **單日唯一記錄**：
+  - 系統僅保留每日最後一筆體重記錄
+  - 當同一天有多次體重更新時，新的記錄會覆蓋舊的記錄
+  - 確保每個日期（YYYY-MM-DD）只對應一筆體重資料
+- **記錄時機**：
+  - 在設定頁面手動更新體重時自動記錄
+  - 編輯個人檔案修改體重時自動記錄
+  - 相同日期的多次更新會以最新一筆為準
+- **資料一致性**：
+  - 體重趨勢圖表使用每日最後上傳的體重值
+  - 體重資料列表顯示每日唯一記錄
+  - 刪除記錄後該日期不再顯示體重資料點
+
+#### 3.7.4 互動行為
 - 滑動或點擊刪除按鈕刪除記錄（需確認）
 - 最新記錄排在最上方
 
-#### 3.7.4 資料結構
+#### 3.7.5 資料結構
 ```typescript
 interface WeightRecord {
   id: string;
@@ -332,20 +346,321 @@ interface WeightRecord {
 ### 3.8 熱量追蹤（Calorie Tracking）
 
 #### 3.8.1 功能描述
-在設定頁面顯示 7 天熱量攝取趨勢圖表。
+在設定頁面顯示所有有記錄日期的熱量攝取趨勢圖表。
 
-#### 3.8.2 圖表規格
-- **類型**：折線圖
-- **資料範圍**：最近 7 天
-- **X 軸**：日期（月/日格式）
-- **Y 軸**：熱量值（kcal）
-- **參考線**：目標熱量（綠色虛線）
-- **資料點**：綠色圓點
-- **趨勢線**：綠色實線
+#### 3.8.2 長條圖規格設計
 
-#### 3.8.3 互動行為
-- 滑鼠懸停顯示當日詳細數值
-- 響應式調整圖表大小
+**圖表類型與基本配置**
+- **圖表類型**：長條圖（Bar Chart）
+- **圖表高度**：256px（固定高度）
+- **資料範圍**：所有有飲食記錄的日期（不限時間範圍）
+- **圖表庫**：Recharts 3.5.0
+
+**軸線設定**
+- **X 軸（日期軸）**：
+  - 資料來源：`displayDate`（月/日格式，如「12/1」）
+  - 字體大小：12px
+  - 字體顏色：#64748b（slate-500）
+  - 軸線顏色：#cbd5e1（slate-300）
+  - 標籤間隔：`interval={0}`（顯示所有日期）
+  - 標籤角度：
+    - ≤14 筆記錄：水平顯示（angle=0）
+    - >14 筆記錄：傾斜 -45 度（angle=-45, textAnchor='end'）
+  - 軸高度：
+    - ≤14 筆記錄：30px
+    - >14 筆記錄：60px（為傾斜標籤預留空間）
+- **Y 軸（熱量軸）**：
+  - 單位：kcal
+  - 字體大小：12px
+  - 字體顏色：#64748b（slate-500）
+  - 軸線顏色：#cbd5e1（slate-300）
+  - 固定寬度：50px（左側固定區域）
+
+**視覺元素**
+- **長條（Bar）**：
+  - 填充色：#10b981（emerald-500 翠綠色）
+  - 頂部圓角：8px（`radius={[8, 8, 0, 0]}`）
+  - 單個長條寬度：40px
+  - 間距：由 Recharts 自動計算
+- **網格線（CartesianGrid）**：
+  - 樣式：虛線（`strokeDasharray="3 3"`）
+  - 顏色：#f1f5f9（slate-100 淺灰色）
+- **參考線（ReferenceLine）**：
+  - Y 值：`user.targetCalories`（目標熱量）
+  - 顏色：#64748b（slate-500 灰色）
+  - 樣式：虛線（`strokeDasharray="5 5"`）
+  - 標籤：「目標」，位置右上角（insideTopRight），字體大小 12px
+
+**互動元素**
+- **Tooltip（懸停提示）**：
+  - 觸發方式：滑鼠懸停於長條上
+  - 背景色：#ffffff（白色）
+  - 邊框：1px solid #e2e8f0（slate-200）
+  - 圓角：8px
+  - 字體大小：12px
+  - 文字顏色：#475569（slate-600）
+  - 顯示內容：「攝取熱量：XXX kcal」
+
+**邊距設定（Margin）**
+- ≤14 筆記錄：`{ top: 20, right: 30, left: 0, bottom: 35 }`
+- >14 筆記錄：`{ top: 20, right: 30, left: 0, bottom: 65 }`
+
+#### 3.8.3 資料處理邏輯
+
+**資料聚合**
+```typescript
+// 按日期分組計算每日總熱量
+const dailyData: { [date: string]: number } = {};
+logs.forEach(log => {
+  if (dailyData[log.date]) {
+    dailyData[log.date] += log.calories;
+  } else {
+    dailyData[log.date] = log.calories;
+  }
+});
+```
+
+**圖表資料準備**
+- 提取所有有記錄的日期，按日期排序（升序）
+- 轉換日期格式為「月/日」顯示格式
+- 建立圖表資料結構：
+  ```typescript
+  {
+    date: string,        // 原始日期 YYYY-MM-DD
+    displayDate: string, // 顯示日期 M/D
+    calories: number     // 當日總熱量
+  }
+  ```
+
+**空資料處理**
+- 當 `chartData.length === 0` 時：
+  - 顯示空狀態訊息：「尚無飲食記錄」
+  - 文字樣式：text-sm text-slate-400
+  - 位置：垂直水平居中
+
+**顯示規則**
+- ✅ 有記錄的日期：顯示對應高度的綠色長條
+- ❌ 無記錄的日期：不顯示，不佔用圖表空間
+- 📊 資料點數量：無上限，顯示所有歷史記錄
+
+#### 3.8.4 響應式滾動設計
+
+**佈局結構**
+```
+外層容器（h-64）
+├─ 固定 Y 軸區域（flex-shrink-0, width: 50px）
+│  └─ ResponsiveContainer + BarChart（僅顯示 Y 軸）
+└─ 可滾動圖表區域（flex-1, overflow-x-auto）
+   └─ 動態寬度容器
+      └─ ResponsiveContainer + BarChart（顯示長條與 X 軸）
+```
+
+**動態寬度計算**
+- 最小寬度：`Math.max(chartData.length × 40, 350)`
+  - 每筆記錄佔用 40px 寬度
+  - 至少保持 350px 最小寬度
+- 當記錄數量較少時：寬度自適應容器（100%）
+- 當記錄數量較多時：超出容器寬度，啟用水平滾動
+
+**滾動行為**
+- Y 軸固定不動，始終可見
+- X 軸與長條可水平滾動
+- 滾動條樣式：瀏覽器預設樣式
+- 支援觸控滑動（行動裝置）
+
+#### 3.8.5 卡片資訊區塊
+
+**卡片佈局**
+- 背景色：白色
+- 內邊距：16px
+- 圓角：12px
+- 邊框：1px solid #f1f5f9（slate-100）
+- 陰影：shadow-sm（淺陰影）
+
+**顯示資訊**
+1. **標題**：「卡路里」（text-base font-bold text-slate-700）
+2. **每日目標**：
+   - 標籤：「每日目標」
+   - 數值：`{user.targetCalories} kcal`（font-bold text-emerald-600）
+3. **每日總消耗**：
+   - 標籤：「每日總消耗 (TDEE)」
+   - 數值：`{user.tdee} kcal`（font-bold text-slate-900）
+4. **長條圖**：（詳見上述規格）
+
+---
+
+### 3.9 體重追蹤（Weight Tracking）
+
+#### 3.9.1 功能描述
+在設定頁面顯示體重變化趨勢折線圖，追蹤體重達成進度。
+
+#### 3.9.2 折線圖規格設計
+
+**圖表類型與基本配置**
+- **圖表類型**：折線圖（Line Chart）
+- **圖表高度**：256px（固定高度）
+- **資料範圍**：所有體重記錄（按時間戳排序）
+- **圖表庫**：Recharts 3.5.0
+
+**軸線設定**
+- **X 軸（日期軸）**：
+  - 資料來源：`displayDate`（月/日格式，使用 zh-TW 地區格式）
+  - 字體大小：12px
+  - 字體顏色：#64748b（slate-500）
+  - 軸線顏色：#cbd5e1（slate-300）
+  - 標籤間隔：`interval={0}`（顯示所有日期）
+  - 標籤角度：
+    - ≤14 筆記錄：水平顯示（angle=0）
+    - >14 筆記錄：傾斜 -45 度（angle=-45, textAnchor='end'）
+  - 軸高度：
+    - ≤14 筆記錄：30px
+    - >14 筆記錄：60px
+- **Y 軸（體重軸）**：
+  - 單位：kg
+  - 字體大小：12px
+  - 字體顏色：#64748b（slate-500）
+  - 軸線顏色：#cbd5e1（slate-300）
+  - 固定寬度：50px
+  - 數值格式：保留兩位小數（`tickFormatter={(value) => value.toFixed(2)}`）
+  - 動態範圍：`[Math.floor(minWeight - padding), Math.ceil(maxWeight + padding)]`
+    - padding = (maxWeight - minWeight) × 0.1，最少 2kg
+
+**視覺元素**
+- **折線（Line）**：
+  - 類型：`monotone`（平滑曲線）
+  - 顏色：#10b981（emerald-500 翠綠色）
+  - 線條粗細：2px（`strokeWidth={2}`）
+- **資料點（Dot）**：
+  - 填充色：#10b981（emerald-500）
+  - 半徑：4px（`r={4}`）
+  - 懸停時半徑：6px（`activeDot={{ r: 6 }}`）
+- **網格線（CartesianGrid）**：
+  - 樣式：虛線（`strokeDasharray="3 3"`）
+  - 顏色：#f1f5f9（slate-100）
+- **參考線（ReferenceLine）**：
+  - Y 值：`user.targetWeight`（目標體重）
+  - 顏色：#10b981（emerald-500 翠綠色）
+  - 樣式：虛線（`strokeDasharray="5 5"`）
+  - 標籤：「目標」，位置右側（right），綠色文字，字體大小 12px
+
+**互動元素**
+- **Tooltip（懸停提示）**：
+  - 觸發方式：滑鼠懸停於資料點或折線上
+  - 背景色：#ffffff（白色）
+  - 邊框：1px solid #e2e8f0（slate-200）
+  - 圓角：8px
+  - 字體大小：12px
+  - 文字顏色：#475569（slate-600）
+  - 顯示內容：「體重：XX.XX kg」（保留兩位小數）
+
+**邊距設定（Margin）**
+- ≤14 筆記錄：`{ top: 5, right: 20, left: 0, bottom: 5 }`
+- >14 筆記錄：`{ top: 5, right: 20, left: 0, bottom: 50 }`
+
+#### 3.9.3 資料處理邏輯
+
+**資料排序與轉換**
+```typescript
+// 按時間戳排序，確保折線圖按時間順序顯示
+const chartData = weightRecords
+  .sort((a, b) => a.timestamp - b.timestamp)
+  .map(record => ({
+    date: record.date,
+    weight: record.weight,
+    displayDate: new Date(record.date + 'T00:00:00')
+      .toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })
+  }));
+```
+
+**Y 軸動態範圍計算**
+```typescript
+const weights = chartData.map(d => d.weight);
+const minWeight = Math.min(...weights, user.targetWeight);
+const maxWeight = Math.max(...weights, user.targetWeight);
+const yAxisPadding = (maxWeight - minWeight) * 0.1 || 2; // 至少 2kg padding
+const yDomain = [
+  Math.floor(minWeight - yAxisPadding),
+  Math.ceil(maxWeight + yAxisPadding)
+];
+```
+
+**空資料處理**
+- 當 `chartData.length === 0` 時：
+  - 不顯示圖表卡片
+  - 僅顯示「當前體重」卡片
+
+**顯示規則**
+- ✅ 有記錄的日期：顯示對應體重的資料點
+- ❌ 無記錄的日期：不顯示，折線跳過（不連接不相鄰的點）
+- 📊 資料點數量：無上限，顯示所有歷史記錄
+- 🔄 記錄覆蓋：同一天多次記錄時，僅保留最後一筆（見 3.7.3 體重記錄規則）
+
+#### 3.9.4 響應式滾動設計
+
+**佈局結構**
+```
+外層容器（h-64）
+└─ 可滾動容器（overflow-x-auto, overflow-y-hidden）
+   └─ 動態寬度容器
+      └─ ResponsiveContainer + LineChart
+```
+
+**動態寬度計算**
+- 最小寬度：`Math.max(chartData.length × 50, 400)`
+  - 每筆記錄佔用 50px 寬度
+  - 至少保持 400px 最小寬度
+- 當記錄數量較少時：寬度自適應容器（100%）
+- 當記錄數量較多時：超出容器寬度，啟用水平滾動
+
+**滾動行為**
+- 整個圖表（包含 Y 軸）可水平滾動
+- 滾動條樣式：瀏覽器預設樣式
+- 支援觸控滑動（行動裝置）
+
+#### 3.9.5 卡片資訊區塊
+
+**當前體重卡片**
+- **標題**：「當前體重」（text-base font-bold text-slate-700）
+- **編輯按鈕**：鉛筆圖示（SquarePen, size=16）
+- **顯示模式**：
+  - 體重數值：大字顯示（text-2xl font-bold text-green-700）
+  - 單位：kg（text-lg font-medium text-slate-600）
+  - 分隔線：border-t border-slate-100
+  - 進度資訊：
+    - **還需減重**：`XX.XX kg`（font-bold text-orange-600）
+    - **預估達成時間**：`約 X 週`（font-bold text-green-600）
+    - **已達成**：🎉 已達成目標！（text-green-600）
+    - **已超過**：🎉 已超過目標 XX.XX kg（text-green-600）
+- **編輯模式**：
+  - 輸入框：綠色邊框（border-2 border-green-400）
+  - 支援小數點後兩位
+  - 快捷鍵：Enter 儲存、Escape 取消
+  - 按鈕：
+    - 儲存：綠色按鈕（bg-green-600）
+    - 取消：灰色邊框按鈕（border border-slate-200）
+
+**體重趨勢圖卡片**
+- **標題**：「體重」（text-base font-bold text-slate-700）
+- **列表按鈕**：清單圖示 + 「列表」文字（List icon, size=16）
+- **折線圖**：（詳見上述規格）
+- **顯示條件**：`chartData.length > 0`（至少有一筆體重記錄）
+
+#### 3.9.6 體重更新邏輯
+
+**更新時機**
+- 在設定頁面點擊編輯按鈕手動更新
+- 在編輯個人檔案頁面修改體重
+
+**記錄規則**（詳見 3.7.3）
+- 同一天僅保留最後一筆記錄
+- 自動新增時間戳（`Date.now()`）
+- 自動生成唯一 ID（`Date.now().toString()`）
+
+**資料同步**
+- 更新 `UserProfile.weight`
+- 新增或覆蓋 `WeightRecord`
+- 即時儲存至 LocalStorage（`dietlog_weight_records_v1`）
+- 自動重新計算進度資訊
 
 ---
 
