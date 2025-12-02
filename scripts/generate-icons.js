@@ -59,6 +59,16 @@ function main(){
   makeIconSync(192, path.join(outDir, 'icon-192.png'));
   makeIconSync(512, path.join(outDir, 'icon-512.png'));
   makeIconSync(180, path.join(outDir, 'apple-touch-icon.png'));
+  // Generate favicons
+  makeIconSync(16, path.join(outDir, 'favicon-16x16.png'));
+  makeIconSync(32, path.join(outDir, 'favicon-32x32.png'));
+  makeIconSync(48, path.join(outDir, 'favicon-48x48.png'));
+  
+  // Copy the 32x32 as favicon.ico (simple approach)
+  const favicon32 = path.join(outDir, 'favicon-32x32.png');
+  const faviconPath = path.join(process.cwd(), 'public', 'favicon.ico');
+  fs.copyFileSync(favicon32, faviconPath);
+  console.log('Wrote', faviconPath);
 }
 
 main();
