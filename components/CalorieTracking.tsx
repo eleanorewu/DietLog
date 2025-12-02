@@ -23,44 +23,31 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
     return dailyData;
   };
 
-  // 準備圖表數據（顯示所有有記錄的日期）
+  // 準備圖表數據（只顯示有記錄的日期）
   const prepareChartData = () => {
     const dailyCalories = getDailyCalories();
     const dates = Object.keys(dailyCalories).sort();
     
     if (dates.length === 0) return [];
     
-    // 取得最早和最晚的日期
-    const firstDate = new Date(dates[0] + 'T00:00:00');
-    const lastDate = new Date(dates[dates.length - 1] + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // 如果最後日期是今天之前，則使用今天作為結束日期
-    const endDate = lastDate > today ? lastDate : today;
-    
-    const chartData = [];
-    const currentDate = new Date(firstDate);
-    
-    // 從最早日期遍歷到結束日期
-    while (currentDate <= endDate) {
-      const dateString = currentDate.toISOString().split('T')[0];
-      const displayDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+    // 只包含有記錄的日期
+    const chartData = dates.map(dateString => {
+      const date = new Date(dateString + 'T00:00:00');
+      const displayDate = `${date.getMonth() + 1}/${date.getDate()}`;
       
-      chartData.push({
+      return {
         date: dateString,
         displayDate: displayDate,
-        calories: dailyCalories[dateString] || 0,
-      });
-      
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+        calories: dailyCalories[dateString],
+      };
+    });
     
     return chartData;
   };
 
   const chartData = prepareChartData();
-  const daysWithLogs = chartData.filter(day => day.calories > 0).length;
+  // 只要有任何記錄就顯示圖表
+  const hasAnyLogs = chartData.length > 0;
 
   return (
     <div className="space-y-4">
@@ -84,61 +71,77 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
 
         {/* Bar Chart or Empty State */}
         <div className="h-64">
-          {daysWithLogs === 0 ? (
+          {!hasAnyLogs ? (
             <div className="h-full flex items-center justify-center">
               <p className="text-sm text-slate-400">尚無飲食記錄</p>
             </div>
           ) : (
-            <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 400), height: '100%' }}>
+            <div className="flex w-full h-full">
+              {/* 固定的 Y 軸區域 */}
+              <div className="flex-shrink-0" style={{ width: '50px' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis 
-                      dataKey="displayDate" 
-                      tick={{ fontSize: 12, fill: '#64748b' }}
-                      stroke="#cbd5e1"
-                      interval={0}
-                      angle={chartData.length > 14 ? -45 : 0}
-                      textAnchor={chartData.length > 14 ? 'end' : 'middle'}
-                      height={chartData.length > 14 ? 60 : 30}
-                    />
+                  <BarChart data={chartData} margin={{ top: 20, right: 0, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
                     <YAxis 
                       tick={{ fontSize: 12, fill: '#64748b' }}
                       stroke="#cbd5e1"
-                      width={45}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        color: '#475569'
-                      }}
-                      labelStyle={{ color: '#475569' }}
-                      formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
-                    />
-                    {/* 目標熱量參考線 */}
-                    <ReferenceLine 
-                      y={user.targetCalories} 
-                      stroke="#64748b" 
-                      strokeDasharray="5 5"
-                      label={{ 
-                        value: '目標', 
-                        position: 'insideTopRight',
-                        fill: '#475569', 
-                        fontSize: 12,
-                        offset: 10
-                      }}
-                    />
-                    <Bar 
-                      dataKey="calories" 
-                      fill="#10b981"
-                      radius={[8, 8, 0, 0]}
+                      width={50}
                     />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+              
+              {/* 可滾動的圖表區域 */}
+              <div className="flex-1 overflow-x-auto overflow-y-hidden">
+                <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 350), height: '100%' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="displayDate" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        stroke="#cbd5e1"
+                        interval={0}
+                        angle={chartData.length > 14 ? -45 : 0}
+                        textAnchor={chartData.length > 14 ? 'end' : 'middle'}
+                        height={chartData.length > 14 ? 60 : 30}
+                      />
+                      <YAxis 
+                        tick={false}
+                        axisLine={false}
+                        width={0}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#fff', 
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          color: '#475569'
+                        }}
+                        labelStyle={{ color: '#475569' }}
+                        formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
+                      />
+                      {/* 目標熱量參考線 */}
+                      <ReferenceLine 
+                        y={user.targetCalories} 
+                        stroke="#64748b" 
+                        strokeDasharray="5 5"
+                        label={{ 
+                          value: '目標', 
+                          position: 'insideTopRight',
+                          fill: '#475569', 
+                          fontSize: 12,
+                          offset: 10
+                        }}
+                      />
+                      <Bar 
+                        dataKey="calories" 
+                        fill="#10b981"
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           )}

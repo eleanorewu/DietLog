@@ -356,7 +356,6 @@ function App() {
                     user={user}
                     weightRecords={weightRecords}
                     onUpdateWeight={handleUpdateWeight}
-                    onDeleteWeightRecord={handleDeleteWeightRecord}
                     onNavigateToDataList={() => setView('weight-data-list')}
                   />
 

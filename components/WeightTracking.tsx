@@ -180,10 +180,11 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                       height={chartData.length > 14 ? 60 : 30}
                     />
                     <YAxis 
-                      domain={[minWeight - yAxisPadding, maxWeight + yAxisPadding]}
+                      domain={[Math.floor(minWeight - yAxisPadding), Math.ceil(maxWeight + yAxisPadding)]}
                       tick={{ fontSize: 12, fill: '#64748b' }}
                       stroke="#cbd5e1"
-                      width={45}
+                      width={50}
+                      tickFormatter={(value) => value.toFixed(2)}
                     />
                     <Tooltip 
                       contentStyle={{ 
