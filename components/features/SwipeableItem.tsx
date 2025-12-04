@@ -16,7 +16,7 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
   const [isSwiping, setIsSwiping] = useState(false);
   const [startX, setStartX] = useState(0);
   const [showDeleteButton, setShowDeleteButton] = useState(false);
-  const itemRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const SWIPE_THRESHOLD = 80; // 滑動距離閾值
   const DELETE_ZONE = 120; // 刪除區域寬度
@@ -34,83 +34,90 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const clamp = (val: number, a = -DELETE_ZONE, b = 0) => Math.max(a, Math.min(b, val));
+
   const handleTouchStart = (e: React.TouchEvent) => {
     if (disabled || !showDeleteButton) return;
+
+    // 如果已經打開，先攔截此次觸控來收回
+    if (translateX !== 0) {
+      setTranslateX(0);
+      return;
+    }
+
     setIsSwiping(true);
     setStartX(e.touches[0].clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isSwiping || disabled || !showDeleteButton) return;
-    
+
     const currentX = e.touches[0].clientX;
     const diff = startX - currentX;
-    
-    // 只允許向左滑動
-    if (diff > 0 && diff <= DELETE_ZONE) {
-      setTranslateX(-diff);
-    }
+
+    // 允許向左滑動 (負值位移)，也允許向右拉回 (正值)
+    const next = clamp(-diff);
+    setTranslateX(next);
   };
 
   const handleTouchEnd = () => {
-    if (!isSwiping || disabled || !showDeleteButton) return;
-    
+    if (!showDeleteButton) return;
+
     setIsSwiping(false);
-    
-    // 如果滑動距離超過閾值，保持在刪除位置
+
+    // 如果滑動距離超過閾值，保持在刪除位置，否則回彈
     if (Math.abs(translateX) > SWIPE_THRESHOLD) {
       setTranslateX(-DELETE_ZONE);
     } else {
-      // 否則回彈
       setTranslateX(0);
     }
   };
 
   const handleDelete = () => {
-    // 先滑出動畫
+    // 簡短的滑出動畫再執行刪除
     setTranslateX(-400);
-    setTimeout(() => {
-      onDelete();
-    }, 200);
+    setTimeout(() => onDelete(), 200);
   };
 
   const handleClick = (e: React.MouseEvent) => {
-    // 如果已經滑出，攔截點擊並收回
+    // 如果已經滑出，點擊收回
     if (translateX !== 0) {
       e.stopPropagation();
       e.preventDefault();
       setTranslateX(0);
     }
-    // 否則不攔截，讓點擊事件正常傳遞給 children
   };
 
   return (
-    <div className="relative overflow-hidden" ref={itemRef}>
-      {/* 刪除按鈕背景 - 只在手機顯示 */}
-      {showDeleteButton && (
-        <div className="absolute inset-0 flex items-center justify-end">
-          <button
-            onClick={handleDelete}
-            className="h-full w-[120px] bg-red-500 flex items-center justify-center text-white"
-          >
-            <Trash2 size={20} />
-          </button>
+    <div className="relative w-full" ref={containerRef}>
+      {/* clipper: 負責遮罩 action 與圓角 */}
+      <div className="overflow-hidden rounded-2xl">
+        {/* 刪除按鈕背景 - 放在 clipper 內，預設被遮罩 */}
+        {showDeleteButton && (
+          <div className="absolute inset-0 flex items-center justify-end pointer-events-none">
+            <button
+              onClick={handleDelete}
+              className="h-full w-[120px] bg-red-500 flex items-center justify-center text-white pointer-events-auto"
+            >
+              <Trash2 size={20} />
+            </button>
+          </div>
+        )}
+
+        {/* 可滑動的內容 (放在 clipper 之內) */}
+        <div
+          className="relative bg-transparent"
+          style={{
+            transform: `translateX(${translateX}px)`,
+            transition: isSwiping ? 'none' : 'transform 0.28s cubic-bezier(.2,.9,.2,1)',
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={handleClick}
+        >
+          {children}
         </div>
-      )}
-      
-      {/* 可滑動的內容 */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          transform: `translateX(${translateX}px)`,
-          transition: isSwiping ? 'none' : 'transform 0.3s ease-out',
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onClick={handleClick}
-      >
-        {children}
       </div>
     </div>
   );
