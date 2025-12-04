@@ -13,7 +13,7 @@ function App() {
   const { user, setUser, updateUser, resetUser } = useUserProfile();
   const { logs, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs();
   const { weightRecords, addWeightRecord, deleteWeightRecord, resetWeightRecords } = useWeightRecords();
-  const { view, selectedDate, navigateTo, navigateToDate } = useNavigation();
+  const { view, selectedDate, setSelectedDate, navigateTo, navigateToDate } = useNavigation();
   
   // UI 狀態
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
