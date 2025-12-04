@@ -105,8 +105,9 @@ export const subscribeFoodLogs = (
 ): (() => void) => {
   const q = query(
     collection(db, COLLECTIONS.FOOD_LOGS),
-    where('userId', '==', uid),
-    orderBy('timestamp', 'desc')
+    where('userId', '==', uid)
+    // 暫時移除 orderBy，等 Firestore 索引建立完成後再加回
+    // orderBy('timestamp', 'desc')
   );
   
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -114,6 +115,8 @@ export const subscribeFoodLogs = (
     querySnapshot.forEach((doc) => {
       logs.push(doc.data() as FoodLog);
     });
+    // 在客戶端排序
+    logs.sort((a, b) => b.timestamp - a.timestamp);
     callback(logs);
   }, (error) => {
     console.error('Error subscribing to food logs:', error);
@@ -198,8 +201,9 @@ export const subscribeWeightRecords = (
 ): (() => void) => {
   const q = query(
     collection(db, COLLECTIONS.WEIGHT_RECORDS),
-    where('userId', '==', uid),
-    orderBy('timestamp', 'desc')
+    where('userId', '==', uid)
+    // 暫時移除 orderBy，等 Firestore 索引建立完成後再加回
+    // orderBy('timestamp', 'desc')
   );
   
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -207,6 +211,8 @@ export const subscribeWeightRecords = (
     querySnapshot.forEach((doc) => {
       records.push(doc.data() as WeightRecord);
     });
+    // 在客戶端排序
+    records.sort((a, b) => b.timestamp - a.timestamp);
     callback(records);
   }, (error) => {
     console.error('Error subscribing to weight records:', error);

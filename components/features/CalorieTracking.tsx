@@ -128,6 +128,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                         }}
                         labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
                         formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
+                        cursor={{ fill: 'transparent' }}
                       />
                       {/* 目標熱量參考線 */}
                       <ReferenceLine 
