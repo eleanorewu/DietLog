@@ -7,3 +7,5 @@ export { EditProfile } from './EditProfile';
 export { MonthCalendarView } from './MonthCalendarView';
 export { Onboarding } from './Onboarding';
 export { WeightDataList } from './WeightDataList';
+export { AuthPage } from './AuthPage';
+export { AuthLayout } from './AuthLayout';

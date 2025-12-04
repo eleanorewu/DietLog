@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList } from './components/pages';
+import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList, AuthPage } from './components/pages';
 import { WeightTracking, CalorieTracking } from './components/features';
 import { ThemeToggle, Dialog } from './components/ui';
 import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { useUserProfile, useFoodLogs, useWeightRecords, useNavigation } from './hooks';
+import { useUserProfile, useFoodLogs, useWeightRecords, useNavigation, useAuth } from './hooks';
 
 function App() {
+  // 使用 Firebase Auth
+  const { user: firebaseUser, loading: authLoading, logout } = useAuth();
+  
   // 使用 custom hooks 管理狀態
   const { user, setUser, updateUser, resetUser } = useUserProfile();
   const { logs, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs();
@@ -20,40 +23,50 @@ function App() {
   const [editingLog, setEditingLog] = useState<FoodLog | null>(null);
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
 
-  // 初始化：檢查是否有使用者資料，設置初始體重記錄
-  // 只在應用載入時執行一次
+  // 認證狀態管理：當 Firebase 使用者狀態變更時
   useEffect(() => {
-    if (user) {
-      navigateTo('dashboard');
-      // 如果是舊使用者且沒有體重記錄，建立初始記錄
-      if (weightRecords.length === 0) {
-        const initialRecord: WeightRecord = {
-          id: Date.now().toString(),
-          date: getTodayString(),
-          timestamp: Date.now(),
-          weight: user.weight,
-        };
-        addWeightRecord(initialRecord);
-      }
-    } else {
+    if (authLoading) return; // 等待認證狀態載入
+    
+    if (!firebaseUser) {
+      // 未登入：顯示登入頁面
+      navigateTo('login');
+    } else if (!user) {
+      // 已登入但沒有個人檔案：顯示 Onboarding
       navigateTo('onboarding');
+    } else {
+      // 已登入且有個人檔案：顯示 Dashboard
+      if (view === 'login' || view === 'onboarding') {
+        navigateTo('dashboard');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 只在初始化時執行一次
+  }, [firebaseUser, authLoading, user]);
+
+  // 初始化：檢查是否有使用者資料，設置初始體重記錄
+  useEffect(() => {
+    if (user && weightRecords.length === 0) {
+      const initialRecord: WeightRecord = {
+        id: Date.now().toString(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        weight: user.weight,
+      };
+      addWeightRecord(initialRecord);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUser(profile);
     
     // 建立初始體重記錄
-    if (weightRecords.length === 0) {
-      const initialRecord: WeightRecord = {
-        id: Date.now().toString(),
-        date: getTodayString(),
-        timestamp: Date.now(),
-        weight: profile.weight,
-      };
-      addWeightRecord(initialRecord);
-    }
+    const initialRecord: WeightRecord = {
+      id: Date.now().toString(),
+      date: getTodayString(),
+      timestamp: Date.now(),
+      weight: profile.weight,
+    };
+    addWeightRecord(initialRecord);
     
     navigateTo('dashboard');
   };
@@ -143,6 +156,18 @@ function App() {
     setResetDialogOpen(true);
   };
   
+  const handleLogout = async () => {
+    try {
+      await logout();
+      resetUser();
+      resetLogs();
+      resetWeightRecords();
+      navigateTo('login');
+    } catch (error) {
+      console.error('登出失敗:', error);
+    }
+  };
+  
   const confirmReset = () => {
     resetUser();
     resetLogs();
@@ -152,6 +177,61 @@ function App() {
     navigateTo('onboarding');
     setResetDialogOpen(false);
   };
+
+  // 如果正在載入認證狀態，顯示載入畫面
+  if (authLoading) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center transition-colors duration-300">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-4 animate-pulse overflow-hidden">
+              <img src="/icons/icon-192.png" alt="DietLog Logo" className="w-full h-full object-cover" />
+            </div>
+            <p className="text-slate-600 dark:text-gray-400 text-lg">載入中...</p>
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // 顯示認證頁面（登入或註冊）
+  if (view === 'login') {
+    return (
+      <ThemeProvider>
+        <div className="bg-gray-100 dark:bg-gray-800 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
+          <div className="
+            md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
+            max-md:w-full max-md:h-screen max-md:rounded-none
+            bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-150
+          ">
+            <AuthPage />
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // 顯示 Onboarding（已登入但沒有個人檔案）
+  if (view === 'onboarding') {
+    return (
+      <ThemeProvider>
+        <div className="bg-gray-100 dark:bg-gray-800 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
+          <div className="
+            md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
+            max-md:w-full max-md:h-screen max-md:rounded-none
+            bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-150
+          ">
+            <Onboarding onComplete={handleOnboardingComplete} />
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  // 以下是原有的應用程式邏輯（需要登入才能存取）
+  if (!firebaseUser || !user) {
+    return null; // 不應該到達這裡，但加上防護
+  }
 
   return (
     <ThemeProvider>
@@ -163,10 +243,6 @@ function App() {
           bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-150
         ">{/* Main Content Area */}
           <div className="flex-1 overflow-y-auto no-scrollbar w-full">
-          
-          {view === 'onboarding' && (
-            <Onboarding onComplete={handleOnboardingComplete} />
-          )}
 
           {view === 'dashboard' && user && (
             <Dashboard 
@@ -222,6 +298,34 @@ function App() {
                 <div className="space-y-4">
                   {/* Theme Toggle Section */}
                   <ThemeToggle />
+                  
+                  {/* Account Section */}
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
+                    <h3 className="text-base font-bold text-slate-700 dark:text-gray-200 mb-4">我的帳號</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600 dark:text-gray-400">電子郵件</span>
+                        <span className="font-medium text-slate-900 dark:text-gray-100 text-sm">
+                          {firebaseUser?.email || '未設定'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600 dark:text-gray-400">帳號名稱</span>
+                        <span className="font-medium text-slate-900 dark:text-gray-100 text-sm">
+                          {firebaseUser?.displayName || user.name}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Logout Button */}
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full mt-4 flex items-center justify-center p-3 bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-200 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors duration-150"
+                    >
+                      <LogOut size={18} className="mr-2" />
+                      登出
+                    </button>
+                  </div>
                   
                   {/* Profile Section */}
                   <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">

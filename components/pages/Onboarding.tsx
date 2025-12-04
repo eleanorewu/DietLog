@@ -177,10 +177,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 transition-colors duration-200">
+    <div className="flex flex-col h-full transition-colors duration-200">
       {/* Header - 固定在頂部 */}
-      <div className="bg-white dark:bg-gray-900 border-b border-slate-100 dark:border-gray-700">
-        <div className="max-w-md mx-auto px-6 pt-6 pb-4">
+      <div className="border-b border-slate-100 dark:border-gray-700">
+        <div className="px-6 pt-6 pb-4">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1">歡迎使用 DietLog</h1>
           <p className="text-sm text-slate-500 dark:text-gray-400">讓我們為您建立個人化計畫。</p>
         </div>
@@ -205,7 +205,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
       {/* 內容區域 - 可滾動 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-md mx-auto px-6 py-6">
+        <div className="px-6 py-6">
           {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
@@ -457,7 +457,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* 底部按鈕區域 - 固定在底部 */}
-      <div className="bg-white dark:bg-gray-900 p-6 max-w-md mx-auto w-full transition-colors duration-200">
+      <div className="p-6 w-full transition-colors duration-200 border-t border-slate-100 dark:border-gray-700">
         <div className="flex gap-3">
           {step > 1 && (
             <Button
