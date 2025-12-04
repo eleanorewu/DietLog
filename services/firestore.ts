@@ -144,8 +144,9 @@ export const addFoodLog = async (uid: string, log: FoodLog): Promise<void> => {
  */
 export const updateFoodLog = async (uid: string, log: FoodLog): Promise<void> => {
   try {
+    const logWithUserId = { ...log, userId: uid };
     const docRef = doc(db, COLLECTIONS.FOOD_LOGS, log.id);
-    await updateDoc(docRef, { ...log });
+    await updateDoc(docRef, { ...logWithUserId });
   } catch (error) {
     console.error('Error updating food log:', error);
     throw error;
