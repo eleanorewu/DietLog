@@ -131,10 +131,13 @@ export const subscribeFoodLogs = (
 export const addFoodLog = async (uid: string, log: FoodLog): Promise<void> => {
   try {
     const logWithUserId = { ...log, userId: uid };
+    console.log('Adding food log to Firestore:', { id: log.id, userId: uid });
     const docRef = doc(db, COLLECTIONS.FOOD_LOGS, log.id);
     await setDoc(docRef, logWithUserId);
+    console.log('Food log added successfully:', log.id);
   } catch (error) {
     console.error('Error adding food log:', error);
+    console.error('Failed log data:', { logId: log.id, userId: uid });
     throw error;
   }
 };
@@ -158,10 +161,13 @@ export const updateFoodLog = async (uid: string, log: FoodLog): Promise<void> =>
  */
 export const deleteFoodLog = async (logId: string): Promise<void> => {
   try {
+    console.log('Deleting food log from Firestore:', logId);
     const docRef = doc(db, COLLECTIONS.FOOD_LOGS, logId);
     await deleteDoc(docRef);
+    console.log('Food log deleted successfully:', logId);
   } catch (error) {
     console.error('Error deleting food log:', error);
+    console.error('Failed to delete log:', logId);
     throw error;
   }
 };
