@@ -8,7 +8,7 @@ import { Dialog } from '../ui/Dialog';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface FoodEntryProps {
-  onSave: (log: FoodLog) => void;
+  onSave: (log: FoodLog) => Promise<void>;
   onDelete?: (id: string) => void;
   onCancel: () => void;
   initialDate?: string;
@@ -123,20 +123,27 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
     }
   };
 
-  const handleSubmit = () => {
-    const log: FoodLog = {
-      id: initialData ? initialData.id : generateId(),
-      date: initialData ? initialData.date : (initialDate || getTodayString()),
-      timestamp: initialData ? initialData.timestamp : Date.now(),
-      name: formData.name || '未知名稱',
-      mealType: formData.mealType,
-      photoUrl: photoPreview || undefined,
-      calories: Number(formData.calories) || 0,
-      protein: Number(formData.protein) || 0,
-      fat: Number(formData.fat) || 0,
-      carbs: Number(formData.carbs) || 0,
-    };
-    onSave(log);
+  const handleSubmit = async () => {
+    try {
+      const log: FoodLog = {
+        id: initialData ? initialData.id : generateId(),
+        date: initialData ? initialData.date : (initialDate || getTodayString()),
+        timestamp: initialData ? initialData.timestamp : Date.now(),
+        name: formData.name || '未知名稱',
+        mealType: formData.mealType,
+        // Firestore 不允許 undefined，只能是具體值或不存在該欄位
+        ...(photoPreview ? { photoUrl: photoPreview } : {}),
+        calories: Number(formData.calories) || 0,
+        protein: Number(formData.protein) || 0,
+        fat: Number(formData.fat) || 0,
+        carbs: Number(formData.carbs) || 0,
+      };
+      await onSave(log);
+    } catch (error) {
+      console.error('Failed to save food log:', error);
+      // 可以在這裡加上使用者友善的錯誤提示
+      alert('儲存失敗，請稍後再試');
+    }
   };
 
   const handleDelete = () => {
