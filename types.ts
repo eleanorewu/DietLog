@@ -32,6 +32,7 @@ export interface FoodLog {
   protein: number;
   fat: number;
   carbs: number;
+  userId?: string; // Firebase UID - for Firestore sync
 }
 
 export interface WeightRecord {
@@ -40,4 +41,5 @@ export interface WeightRecord {
   timestamp: number;
   weight: number; // kg
   note?: string; // 可選的備註
+  userId?: string; // Firebase UID - for Firestore sync
 }

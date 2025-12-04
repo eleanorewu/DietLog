@@ -1,45 +1,68 @@
 import { useState, useEffect } from 'react';
 import { WeightRecord } from '../types';
-import { STORAGE_KEYS } from '../constants/storage';
+import {
+  subscribeWeightRecords,
+  addWeightRecord as addWeightRecordToFirestore,
+  deleteWeightRecord as deleteWeightRecordFromFirestore
+} from '../services/firestore';
 
 /**
- * 管理體重記錄的 Hook
+ * 管理體重記錄的 Hook (使用 Firestore 即時同步)
  */
-export const useWeightRecords = () => {
+export const useWeightRecords = (firebaseUid: string | null) => {
   const [weightRecords, setWeightRecords] = useState<WeightRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 載入體重記錄
+  // 訂閱 Firestore 即時更新
   useEffect(() => {
-    const savedWeightRecords = localStorage.getItem(STORAGE_KEYS.WEIGHT_RECORDS);
-    if (savedWeightRecords) {
-      setWeightRecords(JSON.parse(savedWeightRecords));
+    if (!firebaseUid) {
+      setWeightRecords([]);
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  // 儲存體重記錄
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.WEIGHT_RECORDS, JSON.stringify(weightRecords));
-  }, [weightRecords]);
-
-  const addWeightRecord = (record: WeightRecord) => {
-    setWeightRecords((prev) => {
-      // Remove any existing record for the same date (keep only the latest)
-      const filtered = prev.filter((r) => r.date !== record.date);
-      return [...filtered, record];
+    setLoading(true);
+    const unsubscribe = subscribeWeightRecords(firebaseUid, (updatedRecords) => {
+      setWeightRecords(updatedRecords);
+      setLoading(false);
     });
+
+    // 清理訂閱
+    return () => unsubscribe();
+  }, [firebaseUid]);
+
+  const addWeightRecord = async (record: WeightRecord) => {
+    if (!firebaseUid) return;
+
+    try {
+      await addWeightRecordToFirestore(firebaseUid, record);
+      // Firestore 訂閱會自動更新 state
+    } catch (error) {
+      console.error('Failed to add weight record:', error);
+      throw error;
+    }
   };
 
-  const deleteWeightRecord = (id: string) => {
-    setWeightRecords((prev) => prev.filter((record) => record.id !== id));
+  const deleteWeightRecord = async (id: string) => {
+    if (!firebaseUid) return;
+
+    try {
+      await deleteWeightRecordFromFirestore(id);
+      // Firestore 訂閱會自動更新 state
+    } catch (error) {
+      console.error('Failed to delete weight record:', error);
+      throw error;
+    }
   };
 
   const resetWeightRecords = () => {
-    localStorage.removeItem(STORAGE_KEYS.WEIGHT_RECORDS);
+    // 不刪除 Firestore 資料，只清空本地 state
     setWeightRecords([]);
   };
 
   return {
     weightRecords,
+    loading,
     addWeightRecord,
     deleteWeightRecord,
     resetWeightRecords,

@@ -1,51 +1,81 @@
 import { useState, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { STORAGE_KEYS } from '../constants/storage';
+import { getUserProfile, saveUserProfile, deleteUserProfile } from '../services/firestore';
 
 /**
- * 管理使用者個人檔案的 Hook
+ * 管理使用者個人檔案的 Hook (使用 Firestore)
  */
-export const useUserProfile = () => {
+export const useUserProfile = (firebaseUid: string | null) => {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 載入使用者資料
+  // 載入使用者資料從 Firestore
   useEffect(() => {
-    const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
-
-    if (savedUser) {
-      let parsedUser = JSON.parse(savedUser);
-      
-      // Migration: Add default values for new fields if they don't exist
-      if (!parsedUser.targetWeight) {
-        parsedUser.targetWeight = parsedUser.weight - 5;
-      }
-      if (!parsedUser.weeklyWeightLoss) {
-        parsedUser.weeklyWeightLoss = 0.5;
-      }
-      
-      setUser(parsedUser);
+    if (!firebaseUid) {
+      setUser(null);
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  // 儲存使用者資料
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    const loadUserProfile = async () => {
+      try {
+        setLoading(true);
+        const profile = await getUserProfile(firebaseUid);
+        setUser(profile);
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserProfile();
+  }, [firebaseUid]);
+
+  // 更新使用者資料到 Firestore
+  const updateUser = async (updatedUser: UserProfile) => {
+    if (!firebaseUid) return;
+
+    try {
+      await saveUserProfile(firebaseUid, updatedUser);
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      throw error;
     }
-  }, [user]);
-
-  const updateUser = (updatedUser: UserProfile) => {
-    setUser(updatedUser);
   };
 
-  const resetUser = () => {
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    setUser(null);
+  // 建立新使用者資料
+  const createUser = async (newUser: UserProfile) => {
+    if (!firebaseUid) return;
+
+    try {
+      await saveUserProfile(firebaseUid, newUser);
+      setUser(newUser);
+    } catch (error) {
+      console.error('Failed to create user profile:', error);
+      throw error;
+    }
+  };
+
+  // 重置使用者資料
+  const resetUser = async () => {
+    if (!firebaseUid) return;
+
+    try {
+      await deleteUserProfile(firebaseUid);
+      setUser(null);
+    } catch (error) {
+      console.error('Failed to reset user profile:', error);
+      throw error;
+    }
   };
 
   return {
     user,
-    setUser,
+    loading,
+    setUser: createUser,
     updateUser,
     resetUser,
   };

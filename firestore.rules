@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function: 檢查是否為已認證使用者
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function: 檢查是否為擁有者
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection - 只有擁有者可以讀寫自己的資料
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    // Food Logs collection - 只有擁有者可以讀寫自己的記錄
+    match /foodLogs/{logId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+    
+    // Weight Records collection - 只有擁有者可以讀寫自己的記錄
+    match /weightRecords/{recordId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                               resource.data.userId == request.auth.uid;
+    }
+  }
+}

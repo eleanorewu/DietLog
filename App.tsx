@@ -7,25 +7,45 @@ import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useUserProfile, useFoodLogs, useWeightRecords, useNavigation, useAuth } from './hooks';
+import { migrateLocalStorageToFirestore } from './services/firestore';
 
 function App() {
   // 使用 Firebase Auth
   const { user: firebaseUser, loading: authLoading, logout } = useAuth();
   
-  // 使用 custom hooks 管理狀態
-  const { user, setUser, updateUser, resetUser } = useUserProfile();
-  const { logs, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs();
-  const { weightRecords, addWeightRecord, deleteWeightRecord, resetWeightRecords } = useWeightRecords();
+  // 使用 custom hooks 管理狀態 (傳入 Firebase UID)
+  const { user, loading: profileLoading, setUser, updateUser, resetUser } = useUserProfile(firebaseUser?.uid || null);
+  const { logs, loading: logsLoading, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs(firebaseUser?.uid || null);
+  const { weightRecords, loading: weightsLoading, addWeightRecord, deleteWeightRecord, resetWeightRecords } = useWeightRecords(firebaseUser?.uid || null);
   const { view, selectedDate, setSelectedDate, navigateTo, navigateToDate } = useNavigation();
   
   // UI 狀態
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<FoodLog | null>(null);
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
+  const [migrationDone, setMigrationDone] = useState(false);
+
+  // 資料遷移：首次登入時從 localStorage 遷移到 Firestore
+  useEffect(() => {
+    if (!firebaseUser || migrationDone || profileLoading) return;
+
+    const migrate = async () => {
+      try {
+        await migrateLocalStorageToFirestore(firebaseUser.uid);
+        setMigrationDone(true);
+      } catch (error) {
+        console.error('Migration failed:', error);
+        // 即使遷移失敗也標記為完成，避免重複嘗試
+        setMigrationDone(true);
+      }
+    };
+
+    migrate();
+  }, [firebaseUser, migrationDone, profileLoading]);
 
   // 認證狀態管理：當 Firebase 使用者狀態變更時
   useEffect(() => {
-    if (authLoading) return; // 等待認證狀態載入
+    if (authLoading || profileLoading) return; // 等待認證和個人檔案載入
     
     if (!firebaseUser) {
       // 未登入：顯示登入頁面
@@ -40,7 +60,7 @@ function App() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firebaseUser, authLoading, user]);
+  }, [firebaseUser, authLoading, profileLoading, user]);
 
   // 初始化：檢查是否有使用者資料，設置初始體重記錄
   useEffect(() => {
@@ -56,38 +76,50 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleOnboardingComplete = (profile: UserProfile) => {
-    setUser(profile);
-    
-    // 建立初始體重記錄
-    const initialRecord: WeightRecord = {
-      id: Date.now().toString(),
-      date: getTodayString(),
-      timestamp: Date.now(),
-      weight: profile.weight,
-    };
-    addWeightRecord(initialRecord);
-    
-    navigateTo('dashboard');
-  };
-
-  const handleSaveFood = (log: FoodLog) => {
-    if (editingLog) {
-      updateLog(log);
-    } else {
-      addLog(log);
+  const handleOnboardingComplete = async (profile: UserProfile) => {
+    try {
+      await setUser(profile);
+      
+      // 建立初始體重記錄
+      const initialRecord: WeightRecord = {
+        id: Date.now().toString(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        weight: profile.weight,
+      };
+      await addWeightRecord(initialRecord);
+      
+      navigateTo('dashboard');
+    } catch (error) {
+      console.error('Failed to complete onboarding:', error);
     }
-    setEditingLog(null);
-    navigateTo('dashboard');
   };
 
-  const handleDeleteFood = (id: string) => {
-    deleteLog(id);
-    if (editingLog && editingLog.id === id) {
-      setEditingLog(null);
-      if (view === 'food-entry') {
-        navigateTo('dashboard');
+  const handleSaveFood = async (log: FoodLog) => {
+    try {
+      if (editingLog) {
+        await updateLog(log);
+      } else {
+        await addLog(log);
       }
+      setEditingLog(null);
+      navigateTo('dashboard');
+    } catch (error) {
+      console.error('Failed to save food log:', error);
+    }
+  };
+
+  const handleDeleteFood = async (id: string) => {
+    try {
+      await deleteLog(id);
+      if (editingLog && editingLog.id === id) {
+        setEditingLog(null);
+        if (view === 'food-entry') {
+          navigateTo('dashboard');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete food log:', error);
     }
   };
 
@@ -102,54 +134,66 @@ function App() {
     navigateTo('food-entry');
   };
 
-  const handleSaveProfile = (updatedProfile: UserProfile) => {
-    updateUser(updatedProfile);
-    
-    // 確保有體重記錄
-    if (weightRecords.length === 0) {
-      const initialRecord: WeightRecord = {
+  const handleSaveProfile = async (updatedProfile: UserProfile) => {
+    try {
+      await updateUser(updatedProfile);
+      
+      // 確保有體重記錄
+      if (weightRecords.length === 0) {
+        const initialRecord: WeightRecord = {
+          id: Date.now().toString(),
+          date: getTodayString(),
+          timestamp: Date.now(),
+          weight: updatedProfile.weight,
+        };
+        await addWeightRecord(initialRecord);
+      }
+      
+      navigateTo('settings');
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+    }
+  };
+
+  const handleUpdateWeight = async (newWeight: number) => {
+    if (!user) return;
+
+    try {
+      // 重新計算所有指標
+      const bmr = calculateBMR(user.gender, newWeight, user.height, user.age);
+      const tdee = calculateTDEE(bmr, user.activityLevel);
+      const targetCalories = calculateTargetCalories(tdee, user.goal);
+      const macros = calculateMacros(targetCalories, user.goal);
+
+      const updatedProfile: UserProfile = {
+        ...user,
+        weight: newWeight,
+        tdee,
+        targetCalories,
+        targetProtein: macros.protein,
+        targetFat: macros.fat,
+        targetCarbs: macros.carbs,
+      };
+
+      await updateUser(updatedProfile);
+      await handleAddWeightRecord(newWeight);
+    } catch (error) {
+      console.error('Failed to update weight:', error);
+    }
+  };
+
+  const handleAddWeightRecord = async (weight: number) => {
+    try {
+      const newRecord: WeightRecord = {
         id: Date.now().toString(),
         date: getTodayString(),
         timestamp: Date.now(),
-        weight: updatedProfile.weight,
+        weight,
       };
-      addWeightRecord(initialRecord);
+      await addWeightRecord(newRecord);
+    } catch (error) {
+      console.error('Failed to add weight record:', error);
     }
-    
-    navigateTo('settings');
-  };
-
-  const handleUpdateWeight = (newWeight: number) => {
-    if (!user) return;
-
-    // 重新計算所有指標
-    const bmr = calculateBMR(user.gender, newWeight, user.height, user.age);
-    const tdee = calculateTDEE(bmr, user.activityLevel);
-    const targetCalories = calculateTargetCalories(tdee, user.goal);
-    const macros = calculateMacros(targetCalories, user.goal);
-
-    const updatedProfile: UserProfile = {
-      ...user,
-      weight: newWeight,
-      tdee,
-      targetCalories,
-      targetProtein: macros.protein,
-      targetFat: macros.fat,
-      targetCarbs: macros.carbs,
-    };
-
-    updateUser(updatedProfile);
-    handleAddWeightRecord(newWeight);
-  };
-
-  const handleAddWeightRecord = (weight: number) => {
-    const newRecord: WeightRecord = {
-      id: Date.now().toString(),
-      date: getTodayString(),
-      timestamp: Date.now(),
-      weight,
-    };
-    addWeightRecord(newRecord);
   };
 
   const handleReset = () => {
