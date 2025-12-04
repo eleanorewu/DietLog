@@ -90,8 +90,8 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {/* Outer clipper: 隱藏所有溢出內容 */}
-      <div className="relative overflow-hidden rounded-2xl">
+      {/* Outer clipper: 隱藏所有溢出內容，但保留 1px 讓 border 顯示 */}
+      <div className="relative overflow-hidden rounded-xl" style={{ margin: '0 1px' }}>
         {/* 刪除按鈕背景層 - 固定在右側，被滑動內容遮住 */}
         {showDeleteButton && (
           <div className="absolute top-0 right-0 bottom-0 w-[120px] bg-red-500 flex items-center justify-center">
