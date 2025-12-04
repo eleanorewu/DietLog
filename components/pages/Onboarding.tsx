@@ -172,16 +172,25 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   const genderLabels = {
-    male: '生理男',
-    female: '生理女'
+    male: '男性',
+    female: '女性'
   };
 
   return (
     <div className="flex flex-col h-full transition-colors duration-200">
       {/* Header - 固定在頂部 */}
-      <div className="border-b border-slate-100 dark:border-gray-700">
-        <div className="px-6 pt-6 pb-4">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-gray-100 mb-1">歡迎使用 DietLog</h1>
+      <div className="">
+        <div className="px-6 py-8 text-center">
+          {/* Logo */}
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-3 overflow-hidden">
+            <img 
+              src="/icons/icon-192.png" 
+              alt="DietLog Logo" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {/* 標題 */}
+          <h1 className="text-xl font-bold text-slate-800 dark:text-gray-100 mb-1">歡迎使用 DietLog</h1>
           <p className="text-sm text-slate-500 dark:text-gray-400">讓我們為您建立個人化計畫。</p>
         </div>
         
@@ -205,11 +214,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
       {/* 內容區域 - 可滾動 */}
       <div className="flex-1 overflow-y-auto">
-        <div className="px-6 py-6">
+        <div className="px-6 py-8">
           {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">請問您的名字是？<span className="text-red-500 dark:text-red-400">*</span></label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">您的暱稱<span className="text-red-500 dark:text-red-400">*</span></label>
               <input
                 type="text"
                 value={formData.name}
@@ -457,7 +466,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* 底部按鈕區域 - 固定在底部 */}
-      <div className="p-6 w-full transition-colors duration-200 border-t border-slate-100 dark:border-gray-700">
+      <div className="p-6 w-full transition-colors duration-200">
         <div className="flex gap-3">
           {step > 1 && (
             <Button
