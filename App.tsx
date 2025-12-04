@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList } from './components/pages';
 import { WeightTracking, CalorieTracking } from './components/features';
 import { ThemeToggle, Dialog } from './components/ui';
-import { FoodLog, UserProfile, WeightRecord, Theme } from './types';
+import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -13,7 +13,7 @@ function App() {
   const { user, setUser, updateUser, resetUser } = useUserProfile();
   const { logs, addLog, updateLog, deleteLog, resetLogs } = useFoodLogs();
   const { weightRecords, addWeightRecord, deleteWeightRecord, resetWeightRecords } = useWeightRecords();
-  const { view, selectedDate, setView, setSelectedDate, navigateTo, navigateToDate } = useNavigation();
+  const { view, selectedDate, navigateTo, navigateToDate } = useNavigation();
   
   // UI 狀態
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
@@ -21,6 +21,7 @@ function App() {
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
 
   // 初始化：檢查是否有使用者資料，設置初始體重記錄
+  // 只在應用載入時執行一次
   useEffect(() => {
     if (user) {
       navigateTo('dashboard');
@@ -38,7 +39,7 @@ function App() {
       navigateTo('onboarding');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, []); // 只在初始化時執行一次
 
   const handleOnboardingComplete = (profile: UserProfile) => {
     setUser(profile);
@@ -138,11 +139,6 @@ function App() {
     addWeightRecord(newRecord);
   };
 
-  const handleThemeChange = (newTheme: Theme) => {
-    // 主題已由 ThemeContext 管理，不需要更新使用者資料
-    // 避免觸發不必要的重新渲染和導航
-  };
-
   const handleReset = () => {
     setResetDialogOpen(true);
   };
@@ -158,7 +154,7 @@ function App() {
   };
 
   return (
-    <ThemeProvider initialTheme={user?.theme || 'light'}>
+    <ThemeProvider>
       <div className="bg-gray-100 dark:bg-gray-800 min-h-screen flex justify-center items-center max-md:p-0 max-md:min-h-screen transition-colors duration-200">
         {/* Mobile container - fixed size on desktop/tablet, full screen on mobile */}
         <div className="
@@ -225,7 +221,7 @@ function App() {
 
                 <div className="space-y-4">
                   {/* Theme Toggle Section */}
-                  <ThemeToggle user={user} onThemeChange={handleThemeChange} />
+                  <ThemeToggle />
                   
                   {/* Profile Section */}
                   <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
@@ -233,7 +229,7 @@ function App() {
                        <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">我的個人檔案</h3>
                        <button 
                          onClick={() => navigateTo('edit-profile')}
-                         className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150">
+                         className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
                        >
                          <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
                        </button>
@@ -297,7 +293,7 @@ function App() {
 
                   <button 
                     onClick={handleReset}
-                    className="w-full flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-150">
+                    className="w-full flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-150"
                   >
                     <Trash2 size={20} className="mr-2" />
                     重置所有資料

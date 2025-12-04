@@ -1,7 +1,0 @@
-{
-  "name": "DietLog",
-  "description": "一款專注於熱量赤字與營養素視覺化的智慧飲食追蹤器。",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}

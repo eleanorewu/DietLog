@@ -5,7 +5,6 @@ export const STORAGE_KEYS = {
   USER: 'dietlog_user_v1',
   LOGS: 'dietlog_logs_v1',
   WEIGHT_RECORDS: 'dietlog_weight_records_v1',
-  THEME: 'theme',
 } as const;
 
 /**

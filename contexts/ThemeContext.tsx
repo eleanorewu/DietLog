@@ -4,7 +4,6 @@ import { Theme } from '../types';
 
 interface ThemeContextType {
   theme: Theme;
-  toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
 }
 
@@ -20,11 +19,10 @@ export const useTheme = () => {
 
 interface ThemeProviderProps {
   children: ReactNode;
-  initialTheme?: Theme;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialTheme }) => {
-  // 初始化主題：優先使用 localStorage，其次使用 initialTheme，最後使用系統設定
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // 初始化主題：優先使用 localStorage，其次使用系統設定
   const [theme, setThemeState] = useState<Theme>(() => {
     // 1. 檢查 localStorage 是否有儲存的主題
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -32,12 +30,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
       return savedTheme;
     }
     
-    // 2. 如果有傳入 initialTheme，使用它
-    if (initialTheme) {
-      return initialTheme;
-    }
-    
-    // 3. 否則根據系統設定決定
+    // 2. 否則根據系統設定決定
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';
     }
@@ -54,10 +47,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setThemeState(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
   const setTheme = (newTheme: Theme) => {
     // 立即更新 DOM class，避免延遲
     document.documentElement.classList.remove('light', 'dark');
@@ -73,7 +62,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

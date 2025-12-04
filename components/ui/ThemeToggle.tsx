@@ -1,20 +1,13 @@
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
-import { UserProfile } from '../../types';
 
-interface ThemeToggleProps {
-  user: UserProfile;
-  onThemeChange: (theme: 'light' | 'dark') => void;
-}
-
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({ user, onThemeChange }) => {
+export const ThemeToggle: React.FC = () => {
   const { theme, setTheme } = useTheme();
 
   const handleToggle = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    onThemeChange(newTheme);
   };
 
   return (

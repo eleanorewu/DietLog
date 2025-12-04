@@ -19,7 +19,6 @@ export interface UserProfile {
   targetProtein: number;
   targetFat: number;
   targetCarbs: number;
-  theme?: Theme; // 主題設定
 }
 
 export interface FoodLog {
