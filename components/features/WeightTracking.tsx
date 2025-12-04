@@ -68,7 +68,14 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   const weights = chartData.map(d => d.weight);
   const minWeight = Math.min(...weights, user.targetWeight);
   const maxWeight = Math.max(...weights, user.targetWeight);
-  const yAxisPadding = (maxWeight - minWeight) * 0.1 || 1;
+  
+  // 計算 Y 軸刻度，以 1kg 為間距
+  const minTick = Math.floor(minWeight - 1); // 向下取整並減 1kg
+  const maxTick = Math.ceil(maxWeight + 1);  // 向上取整並加 1kg
+  const ticks = [];
+  for (let i = minTick; i <= maxTick; i++) {
+    ticks.push(i);
+  }
   
   // 根據主題設置圖表顏色
   const gridColor = theme === 'dark' ? '#374151' : '#f1f5f9'; // dark: gray-700, light: slate-100
@@ -187,11 +194,12 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                       height={chartData.length > 14 ? 60 : 30}
                     />
                     <YAxis 
-                      domain={[Math.floor(minWeight - yAxisPadding), Math.ceil(maxWeight + yAxisPadding)]}
+                      domain={[minTick, maxTick]}
+                      ticks={ticks}
                       tick={{ fontSize: 12, fill: tickColor }}
                       stroke={axisStroke}
                       width={50}
-                      tickFormatter={(value) => value.toFixed(2)}
+                      tickFormatter={(value) => `${value}`}
                     />
                     <Tooltip 
                       contentStyle={{ 

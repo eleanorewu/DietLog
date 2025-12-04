@@ -113,9 +113,9 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                         height={chartData.length > 14 ? 60 : 30}
                       />
                       <YAxis 
-                        tick={false}
-                        axisLine={false}
-                        width={0}
+                        tick={{ fontSize: 12, fill: tickColor }}
+                        stroke={axisStroke}
+                        width={50}
                       />
                       <Tooltip 
                         contentStyle={{ 
@@ -146,6 +146,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                         dataKey="calories" 
                         fill="#10b981"
                         radius={[8, 8, 0, 0]}
+                        barSize={8}
                       />
                     </BarChart>
                   </ResponsiveContainer>

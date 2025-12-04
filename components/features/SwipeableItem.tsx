@@ -90,23 +90,23 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {/* clipper: 負責遮罩 action 與圓角 */}
-      <div className="overflow-hidden rounded-2xl">
-        {/* 刪除按鈕背景 - 放在 clipper 內，預設被遮罩 */}
+      {/* Outer clipper: 隱藏所有溢出內容 */}
+      <div className="relative overflow-hidden rounded-2xl">
+        {/* 刪除按鈕背景層 - 固定在右側，被滑動內容遮住 */}
         {showDeleteButton && (
-          <div className="absolute inset-0 flex items-center justify-end pointer-events-none">
+          <div className="absolute top-0 right-0 bottom-0 w-[120px] bg-red-500 flex items-center justify-center">
             <button
               onClick={handleDelete}
-              className="h-full w-[120px] bg-red-500 flex items-center justify-center text-white pointer-events-auto"
+              className="w-full h-full flex items-center justify-center text-white"
             >
               <Trash2 size={20} />
             </button>
           </div>
         )}
 
-        {/* 可滑動的內容 (放在 clipper 之內) */}
+        {/* 可滑動的前景內容層 - 覆蓋在刪除按鈕之上 */}
         <div
-          className="relative bg-transparent"
+          className="relative w-full"
           style={{
             transform: `translateX(${translateX}px)`,
             transition: isSwiping ? 'none' : 'transform 0.28s cubic-bezier(.2,.9,.2,1)',
