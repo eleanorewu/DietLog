@@ -139,10 +139,8 @@ function App() {
   };
 
   const handleThemeChange = (newTheme: Theme) => {
-    if (user) {
-      const updatedUser = { ...user, theme: newTheme };
-      updateUser(updatedUser);
-    }
+    // 主題已由 ThemeContext 管理，不需要更新使用者資料
+    // 避免觸發不必要的重新渲染和導航
   };
 
   const handleReset = () => {
@@ -166,7 +164,7 @@ function App() {
         <div className="
           md:w-[375px] md:h-[667px] md:rounded-2xl md:shadow-2xl
           max-md:w-full max-md:h-screen max-md:rounded-none
-          bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-200
+          bg-white dark:bg-gray-900 overflow-hidden relative flex flex-col transition-colors duration-150
         ">{/* Main Content Area */}
           <div className="flex-1 overflow-y-auto no-scrollbar w-full">
           
@@ -217,9 +215,9 @@ function App() {
           )}
 
           {view === 'settings' && user && (
-             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 dark:bg-gray-900 overflow-y-auto no-scrollbar transition-colors duration-200">
+             <div className="p-6 h-full flex flex-col animate-slideIn bg-slate-50 dark:bg-gray-900 overflow-y-auto no-scrollbar transition-colors duration-150">
                 <div className="flex items-center mb-6">
-                   <button onClick={() => navigateTo('dashboard')} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                   <button onClick={() => navigateTo('dashboard')} className="p-2 -ml-2 text-slate-600 dark:text-gray-300 rounded-full hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors duration-150">
                       <LogOut className="rotate-180" size={24}/>
                    </button>
                    <h1 className="text-xl font-bold ml-2 text-slate-900 dark:text-gray-100">設定</h1>
@@ -230,12 +228,12 @@ function App() {
                   <ThemeToggle user={user} onThemeChange={handleThemeChange} />
                   
                   {/* Profile Section */}
-                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
                     <div className="flex justify-between items-center mb-4">
                        <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">我的個人檔案</h3>
                        <button 
                          onClick={() => navigateTo('edit-profile')}
-                         className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+                         className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150">
                        >
                          <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
                        </button>
@@ -299,7 +297,7 @@ function App() {
 
                   <button 
                     onClick={handleReset}
-                    className="w-full flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
+                    className="w-full flex items-center justify-center p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-150">
                   >
                     <Trash2 size={20} className="mr-2" />
                     重置所有資料

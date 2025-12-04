@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { Theme } from '../types';
 
 interface ThemeContextType {
@@ -58,7 +59,17 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
   };
 
   const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+    // 立即更新 DOM class，避免延遲
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(newTheme);
+    
+    // 使用 flushSync 確保 React 立即更新
+    flushSync(() => {
+      setThemeState(newTheme);
+    });
+    
+    // 儲存到 localStorage
+    localStorage.setItem('theme', newTheme);
   };
 
   return (

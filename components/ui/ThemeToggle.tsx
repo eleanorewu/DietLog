@@ -18,10 +18,10 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ user, onThemeChange })
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg transition-colors duration-200">
+          <div className="p-2 rounded-lg transition-colors duration-150">
             {theme === 'light' ? (
               <Sun className="text-green-500" size={20} />
             ) : (
@@ -39,14 +39,14 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ user, onThemeChange })
         <button
           onClick={handleToggle}
           className={`
-            relative w-14 h-7 rounded-full transition-all duration-300 ease-in-out
+            relative w-14 h-7 rounded-full transition-all duration-200 ease-out
             ${theme === 'dark' ? 'bg-slate-600' : 'bg-slate-300'}
           `}
         >
           <div
             className={`
               absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-md
-              transition-transform duration-300 ease-in-out
+              transition-transform duration-200 ease-out
               ${theme === 'dark' ? 'translate-x-7' : 'translate-x-0'}
             `}
           />

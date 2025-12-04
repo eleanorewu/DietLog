@@ -78,13 +78,13 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   return (
     <div className="space-y-4">
       {/* Current Weight Card */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">當前體重</h3>
           {!isEditingWeight && (
             <button 
               onClick={() => setIsEditingWeight(true)}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
             >
               <SquarePen className="text-slate-600 dark:text-gray-300" size={16} />
             </button>
@@ -102,7 +102,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                   if (e.key === 'Enter') handleSaveWeight();
                   if (e.key === 'Escape') handleCancelWeightEdit();
                 }}
-                className="flex-1 bg-white dark:bg-gray-800 border-2 border-green-400 dark:border-green-500 rounded-lg p-2 text-lg font-bold text-slate-700 dark:text-gray-100 outline-none transition-colors duration-200"
+                className="flex-1 bg-white dark:bg-gray-800 border-2 border-green-400 dark:border-green-500 rounded-lg p-2 text-lg font-bold text-slate-700 dark:text-gray-100 outline-none transition-colors duration-150"
                 placeholder="輸入體重"
                 autoFocus
               />
@@ -111,13 +111,13 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={handleSaveWeight}
-                className="flex-1 bg-green-600 dark:bg-green-700 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700 dark:hover:bg-green-800 transition-colors duration-200"
+                className="flex-1 bg-green-600 dark:bg-green-700 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700 dark:hover:bg-green-800 transition-colors duration-150"
               >
                 儲存並更新
               </button>
               <button
                 onClick={handleCancelWeightEdit}
-                className="flex-1 bg-white dark:bg-gray-600 text-slate-600 dark:text-gray-200 py-2 rounded-lg font-medium text-sm border border-slate-200 dark:border-gray-500 hover:bg-slate-50 dark:hover:bg-gray-500 transition-colors duration-200"
+                className="flex-1 bg-white dark:bg-gray-600 text-slate-600 dark:text-gray-200 py-2 rounded-lg font-medium text-sm border border-slate-200 dark:border-gray-500 hover:bg-slate-50 dark:hover:bg-gray-500 transition-colors duration-150"
               >
                 取消
               </button>
@@ -160,12 +160,12 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
 
       {/* Weight Trend Chart */}
       {chartData.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">體重</h3>
             <button 
               onClick={onNavigateToDataList}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
             >
               <List className="text-slate-600 dark:text-gray-300" size={16} />
               <span className="text-sm font-medium text-slate-600 dark:text-gray-300">列表</span>

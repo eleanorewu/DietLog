@@ -59,7 +59,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
   return (
     <div className="space-y-4">
       {/* Calorie Chart Card */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-200">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-slate-100 dark:border-gray-600 shadow-sm transition-colors duration-150">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">卡路里</h3>
         </div>
