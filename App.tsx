@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList, AuthPage } from './components/pages';
 import { WeightTracking, CalorieTracking } from './components/features';
-import { ThemeToggle, Dialog } from './components/ui';
+import { ThemeToggle, Dialog, Loading } from './components/ui';
 import { FoodLog, UserProfile, WeightRecord } from './types';
 import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
@@ -252,18 +252,11 @@ function App() {
     setResetDialogOpen(false);
   };
 
-  // 如果正在載入認證狀態，顯示載入畫面
-  if (authLoading) {
+  // 如果正在載入認證狀態或使用者資料，顯示載入畫面
+  if (authLoading || profileLoading) {
     return (
       <ThemeProvider>
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center transition-colors duration-300">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-4 animate-pulse overflow-hidden">
-              <img src="/icons/icon-192.png" alt="DietLog Logo" className="w-full h-full object-cover" />
-            </div>
-            <p className="text-slate-600 dark:text-gray-400 text-lg">載入中...</p>
-          </div>
-        </div>
+        <Loading message="載入中..." />
       </ThemeProvider>
     );
   }
