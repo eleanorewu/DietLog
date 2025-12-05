@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
  * View 類型定義
  */
 export type View = 
+  | 'loading'
   | 'login'
   | 'onboarding' 
   | 'dashboard' 

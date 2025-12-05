@@ -64,22 +64,29 @@ function App() {
 
   // 認證狀態管理：當 Firebase 使用者狀態變更時
   useEffect(() => {
-    if (authLoading || profileLoading) return; // 等待認證和個人檔案載入
+    // 如果還在載入中，不做任何導航
+    if (authLoading || profileLoading) {
+      return;
+    }
     
+    // 根據認證和使用者資料狀態決定要顯示的頁面
     if (!firebaseUser) {
       // 未登入：顯示登入頁面
-      navigateTo('login');
+      if (view !== 'login') {
+        navigateTo('login');
+      }
     } else if (!user) {
       // 已登入但沒有個人檔案：顯示 Onboarding
-      navigateTo('onboarding');
+      if (view !== 'onboarding') {
+        navigateTo('onboarding');
+      }
     } else {
       // 已登入且有個人檔案：顯示 Dashboard
-      if (view === 'login' || view === 'onboarding') {
+      if (view === 'loading' || view === 'login' || view === 'onboarding') {
         navigateTo('dashboard');
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [firebaseUser, authLoading, profileLoading, user]);
+  }, [firebaseUser, authLoading, profileLoading, user, view, navigateTo]);
 
   // 初始化：檢查是否有使用者資料，設置初始體重記錄
   useEffect(() => {
@@ -252,8 +259,8 @@ function App() {
     setResetDialogOpen(false);
   };
 
-  // 如果正在載入認證狀態或使用者資料，顯示載入畫面
-  if (authLoading || profileLoading) {
+  // 如果正在載入認證狀態或使用者資料，或 view 還在 loading 狀態，顯示載入畫面
+  if (authLoading || profileLoading || view === 'loading') {
     return (
       <ThemeProvider>
         <Loading message="載入中..." />
