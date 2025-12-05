@@ -258,6 +258,49 @@ export const deleteWeightRecord = async (recordId: string): Promise<void> => {
 // ==================== Migration ====================
 
 /**
+ * 清理重複的體重記錄（保留每天最新的一筆）
+ */
+export const cleanupDuplicateWeightRecords = async (uid: string): Promise<void> => {
+  try {
+    console.log('Starting cleanup of duplicate weight records...');
+    
+    const records = await getWeightRecords(uid);
+    
+    // 按日期分組
+    const recordsByDate = new Map<string, WeightRecord[]>();
+    records.forEach(record => {
+      const existing = recordsByDate.get(record.date) || [];
+      existing.push(record);
+      recordsByDate.set(record.date, existing);
+    });
+    
+    // 找出每天有多筆記錄的日期
+    let totalDeleted = 0;
+    for (const [date, dateRecords] of recordsByDate.entries()) {
+      if (dateRecords.length > 1) {
+        // 按 timestamp 排序，保留最新的
+        dateRecords.sort((a, b) => b.timestamp - a.timestamp);
+        const toKeep = dateRecords[0];
+        const toDelete = dateRecords.slice(1);
+        
+        console.log(`Date ${date} has ${dateRecords.length} records, keeping record with timestamp ${toKeep.timestamp}`);
+        
+        // 刪除舊的記錄
+        for (const record of toDelete) {
+          await deleteWeightRecord(record.id);
+          totalDeleted++;
+        }
+      }
+    }
+    
+    console.log(`Cleanup completed. Deleted ${totalDeleted} duplicate records.`);
+  } catch (error) {
+    console.error('Error cleaning up duplicate weight records:', error);
+    throw error;
+  }
+};
+
+/**
  * 從 localStorage 遷移資料到 Firestore
  */
 export const migrateLocalStorageToFirestore = async (uid: string): Promise<void> => {

@@ -7,7 +7,7 @@ import { Trash2, LogOut, SquarePen } from 'lucide-react';
 import { getTodayString, calculateBMR, calculateTDEE, calculateTargetCalories, calculateMacros } from './utils';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useUserProfile, useFoodLogs, useWeightRecords, useNavigation, useAuth } from './hooks';
-import { migrateLocalStorageToFirestore } from './services/firestore';
+import { migrateLocalStorageToFirestore, cleanupDuplicateWeightRecords } from './services/firestore';
 
 function App() {
   // 使用 Firebase Auth
@@ -24,6 +24,7 @@ function App() {
   const [editingLog, setEditingLog] = useState<FoodLog | null>(null);
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
   const [migrationDone, setMigrationDone] = useState(false);
+  const [cleanupDone, setCleanupDone] = useState(false);
 
   // 資料遷移：首次登入時從 localStorage 遷移到 Firestore
   useEffect(() => {
@@ -42,6 +43,24 @@ function App() {
 
     migrate();
   }, [firebaseUser, migrationDone, profileLoading]);
+
+  // 清理重複的體重記錄
+  useEffect(() => {
+    if (!firebaseUser || weightsLoading || cleanupDone || weightRecords.length === 0) return;
+
+    const cleanup = async () => {
+      try {
+        await cleanupDuplicateWeightRecords(firebaseUser.uid);
+        setCleanupDone(true);
+      } catch (error) {
+        console.error('Cleanup failed:', error);
+        // 即使清理失敗也標記為完成，避免重複嘗試
+        setCleanupDone(true);
+      }
+    };
+
+    cleanup();
+  }, [firebaseUser, weightsLoading, weightRecords.length, cleanupDone]);
 
   // 認證狀態管理：當 Firebase 使用者狀態變更時
   useEffect(() => {
@@ -64,7 +83,7 @@ function App() {
 
   // 初始化：檢查是否有使用者資料，設置初始體重記錄
   useEffect(() => {
-    if (user && weightRecords.length === 0) {
+    if (user && weightRecords.length === 0 && !weightsLoading && firebaseUser) {
       const initialRecord: WeightRecord = {
         id: Date.now().toString(),
         date: getTodayString(),
@@ -74,7 +93,7 @@ function App() {
       addWeightRecord(initialRecord);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user, weightsLoading, firebaseUser]);
 
   const handleOnboardingComplete = async (profile: UserProfile) => {
     try {
@@ -184,9 +203,20 @@ function App() {
 
   const handleAddWeightRecord = async (weight: number) => {
     try {
+      const today = getTodayString();
+      
+      // 檢查今天是否已有體重記錄
+      const existingRecord = weightRecords.find(record => record.date === today);
+      
+      if (existingRecord) {
+        // 如果今天已有記錄，先刪除舊的
+        await deleteWeightRecord(existingRecord.id);
+      }
+      
+      // 新增新的體重記錄
       const newRecord: WeightRecord = {
         id: Date.now().toString(),
-        date: getTodayString(),
+        date: today,
         timestamp: Date.now(),
         weight,
       };
