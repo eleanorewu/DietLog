@@ -26,6 +26,21 @@
           -ms-overflow-style: none;  /* IE and Edge */
           scrollbar-width: none;  /* Firefox */
       }
+      
+      /* Global scrollbar hiding - applies to all scrollable elements */
+      * {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+      }
+      
+      *::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+      
+      /* Ensure body and html can still scroll */
+      html, body {
+        overflow: auto;
+      }
     </style>
   <script type="importmap">
 {
