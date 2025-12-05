@@ -69,11 +69,11 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   const minWeight = Math.min(...weights, user.targetWeight);
   const maxWeight = Math.max(...weights, user.targetWeight);
   
-  // 計算 Y 軸刻度，以 1kg 為間距
+  // 計算 Y 軸刻度，以 2kg 為間距
   const minTick = Math.floor(minWeight - 1); // 向下取整並減 1kg
   const maxTick = Math.ceil(maxWeight + 1);  // 向上取整並加 1kg
   const ticks = [];
-  for (let i = minTick; i <= maxTick; i++) {
+  for (let i = minTick; i <= maxTick; i += 2) {
     ticks.push(i);
   }
   
@@ -178,11 +178,11 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
               <span className="text-sm font-medium text-slate-600 dark:text-gray-300">列表</span>
             </button>
           </div>
-          <div className="h-64">
+          <div className="h-64 relative">
             <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 400), height: '100%' }}>
+              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 320), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: chartData.length > 14 ? 50 : 5 }}>
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: chartData.length > 14 ? 50 : 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis 
                       dataKey="displayDate" 
@@ -196,9 +196,9 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                     <YAxis 
                       domain={[minTick, maxTick]}
                       ticks={ticks}
-                      tick={{ fontSize: 12, fill: tickColor }}
+                      tick={{ fontSize: 11, fill: tickColor }}
                       stroke={axisStroke}
-                      width={50}
+                      width={35}
                       tickFormatter={(value) => `${value}`}
                     />
                     <Tooltip 

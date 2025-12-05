@@ -25,6 +25,16 @@ function App() {
   const [defaultMealType, setDefaultMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack' | undefined>(undefined);
   const [migrationDone, setMigrationDone] = useState(false);
   const [cleanupDone, setCleanupDone] = useState(false);
+  const [minLoadingTime, setMinLoadingTime] = useState(true);
+
+  // 確保 Loading 畫面至少顯示 1.5 秒
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinLoadingTime(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 資料遷移：首次登入時從 localStorage 遷移到 Firestore
   useEffect(() => {
@@ -259,8 +269,8 @@ function App() {
     setResetDialogOpen(false);
   };
 
-  // 如果正在載入認證狀態或使用者資料，或 view 還在 loading 狀態，顯示載入畫面
-  if (authLoading || profileLoading || view === 'loading') {
+  // 如果正在載入認證狀態或使用者資料，或 view 還在 loading 狀態，或最小載入時間未到，顯示載入畫面
+  if (authLoading || profileLoading || view === 'loading' || minLoadingTime) {
     return (
       <ThemeProvider>
         <Loading message="載入中..." />

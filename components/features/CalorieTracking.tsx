@@ -83,75 +83,59 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
               <p className="text-sm text-slate-400">尚無飲食記錄</p>
             </div>
           ) : (
-            <div className="flex w-full h-full">
-              {/* 固定的 Y 軸區域 */}
-              <div className="flex-shrink-0" style={{ width: '50px' }}>
+            <div className="w-full h-full overflow-x-auto overflow-y-hidden">
+              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 320), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 0, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
-                    <YAxis 
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: chartData.length > 14 ? 65 : 35 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                    <XAxis 
+                      dataKey="displayDate" 
                       tick={{ fontSize: 12, fill: tickColor }}
                       stroke={axisStroke}
-                      width={50}
+                      interval={0}
+                      angle={chartData.length > 14 ? -45 : 0}
+                      textAnchor={chartData.length > 14 ? 'end' : 'middle'}
+                      height={chartData.length > 14 ? 60 : 30}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 11, fill: tickColor }}
+                      stroke={axisStroke}
+                      width={35}
+                    />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: theme === 'dark' ? '#1F2937' : '#fff', 
+                        border: '1px solid',
+                        borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        color: theme === 'dark' ? '#E5E7EB' : '#475569'
+                      }}
+                      labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
+                      formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
+                      cursor={{ fill: 'transparent' }}
+                    />
+                    {/* 目標熱量參考線 */}
+                    <ReferenceLine 
+                      y={user.targetCalories} 
+                      stroke={tickColor} 
+                      strokeDasharray="5 5"
+                      label={{ 
+                        value: '目標', 
+                        position: 'insideTopRight',
+                        fill: tickColor, 
+                        fontSize: 12,
+                        offset: 10
+                      }}
+                    />
+                    <Bar 
+                      dataKey="calories" 
+                      fill="#10b981"
+                      radius={[8, 8, 0, 0]}
+                      barSize={8}
                     />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
-              
-              {/* 可滾動的圖表區域 */}
-              <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 350), height: '100%' }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: chartData.length > 14 ? 65 : 35 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                      <XAxis 
-                        dataKey="displayDate" 
-                        tick={{ fontSize: 12, fill: tickColor }}
-                        stroke={axisStroke}
-                        interval={0}
-                        angle={chartData.length > 14 ? -45 : 0}
-                        textAnchor={chartData.length > 14 ? 'end' : 'middle'}
-                        height={chartData.length > 14 ? 60 : 30}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12, fill: tickColor }}
-                        stroke={axisStroke}
-                        width={50}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: theme === 'dark' ? '#1F2937' : '#fff', 
-                          border: '1px solid',
-                          borderColor: theme === 'dark' ? '#374151' : '#e2e8f0',
-                          borderRadius: '8px',
-                          fontSize: '12px',
-                          color: theme === 'dark' ? '#E5E7EB' : '#475569'
-                        }}
-                        labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
-                        formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
-                        cursor={{ fill: 'transparent' }}
-                      />
-                      {/* 目標熱量參考線 */}
-                      <ReferenceLine 
-                        y={user.targetCalories} 
-                        stroke={tickColor} 
-                        strokeDasharray="5 5"
-                        label={{ 
-                          value: '目標', 
-                          position: 'insideTopRight',
-                          fill: tickColor, 
-                          fontSize: 12,
-                          offset: 10
-                        }}
-                      />
-                      <Bar 
-                        dataKey="calories" 
-                        fill="#10b981"
-                        radius={[8, 8, 0, 0]}
-                        barSize={8}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
               </div>
             </div>
           )}
