@@ -29,6 +29,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
     calories?: string;
     protein?: string;
@@ -105,14 +106,15 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   const handleChange = (field: string, value: any) => {
     // 如果是數字欄位，只允許數字和空字串
     if (['calories', 'protein', 'carbs', 'fat'].includes(field)) {
-      // 允許空字串、數字、或以數字開頭的字串
-      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      // 允許空字串、整數、或小數點後最多一位的數字
+      // 例如：123, 123., 123.4 都可以，但 123.45 不行
+      if (value === '' || /^\d*\.?\d{0,1}$/.test(value)) {
         setFormData((prev) => ({ ...prev, [field]: value }));
         // 清除該欄位的錯誤訊息
         setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
       } else {
         // 顯示該欄位的錯誤訊息
-        setFieldErrors((prev) => ({ ...prev, [field]: '請輸入有效的數字' }));
+        setFieldErrors((prev) => ({ ...prev, [field]: '請輸入有效的數字（最多一位小數）' }));
         // 3秒後自動清除錯誤訊息
         setTimeout(() => {
           setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -124,7 +126,14 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
   };
 
   const handleSubmit = async () => {
+    // 防止重複提交
+    if (isSaving || isCompressing) {
+      return;
+    }
+
     try {
+      setIsSaving(true);
+      
       const log: FoodLog = {
         id: initialData ? initialData.id : generateId(),
         date: initialData ? initialData.date : (initialDate || getTodayString()),
@@ -138,9 +147,12 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
         fat: Number(formData.fat) || 0,
         carbs: Number(formData.carbs) || 0,
       };
+      
       await onSave(log);
+      // 成功後不需要 setIsSaving(false)，因為會導航離開此頁面
     } catch (error) {
       console.error('Failed to save food log:', error);
+      setIsSaving(false);
       // 可以在這裡加上使用者友善的錯誤提示
       alert('儲存失敗，請稍後再試');
     }
@@ -273,7 +285,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
                 <label className="text-xs text-slate-500 dark:text-gray-400 mb-2 block">熱量 (kcal)</label>
                 <input
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   placeholder="0"
                   value={formData.calories}
                   onChange={(e) => handleChange('calories', e.target.value)}
@@ -288,7 +300,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
                     <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">蛋白質 (g)</label>
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       placeholder="0"
                       value={formData.protein}
                       onChange={(e) => handleChange('protein', e.target.value)}
@@ -302,7 +314,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
                     <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">碳水 (g)</label>
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       placeholder="0"
                       value={formData.carbs}
                       onChange={(e) => handleChange('carbs', e.target.value)}
@@ -316,7 +328,7 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
                     <label className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">脂肪 (g)</label>
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="decimal"
                       placeholder="0"
                       value={formData.fat}
                       onChange={(e) => handleChange('fat', e.target.value)}
@@ -338,10 +350,22 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
         <Button 
           fullWidth 
           onClick={handleSubmit}
-          disabled={isFutureDate_flag}
-          className={isFutureDate_flag ? 'opacity-50 cursor-not-allowed' : ''}
+          disabled={isFutureDate_flag || isCompressing || isSaving}
+          className={isFutureDate_flag || isCompressing || isSaving ? 'opacity-50 cursor-not-allowed' : ''}
         >
-          {initialData ? '更新紀錄' : '儲存紀錄'}
+          {isCompressing ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>圖片處理中...</span>
+            </div>
+          ) : isSaving ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>儲存中...</span>
+            </div>
+          ) : (
+            initialData ? '更新紀錄' : '儲存紀錄'
+          )}
         </Button>
       </div>
       
