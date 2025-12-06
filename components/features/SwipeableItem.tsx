@@ -94,10 +94,10 @@ export const SwipeableItem: React.FC<SwipeableItemProps> = ({
       <div className="relative">
         {/* 刪除按鈕背景層 - 固定在右側，被滑動內容遮住 */}
         {showDeleteButton && (
-          <div className="absolute top-0 right-0 bottom-0 w-[120px] bg-red-500 rounded-r-xl flex items-center justify-center overflow-hidden">
+          <div className="absolute top-0 right-0 bottom-0 w-[120px] flex items-center justify-end pr-0">
             <button
               onClick={handleDelete}
-              className="w-full h-full flex items-center justify-center text-white"
+              className="h-full w-[116px] ml-1 bg-red-500 rounded-l-xl rounded-r-xl flex items-center justify-center text-white"
             >
               <Trash2 size={20} />
             </button>
