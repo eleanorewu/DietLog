@@ -179,10 +179,11 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
             </button>
           </div>
           <div className="h-64 relative">
-            <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 14, 320), height: '100%' }}>
+            {/* 可滾動的圖表容器 */}
+            <div className="w-full h-full overflow-x-auto overflow-y-hidden" style={{ paddingLeft: '45px' }}>
+              <div style={{ width: Math.max(chartData.length * 50, 300), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: chartData.length > 14 ? 50 : 5 }}>
+                  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: chartData.length > 14 ? 50 : 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                     <XAxis 
                       dataKey="displayDate" 
@@ -198,8 +199,9 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                       ticks={ticks}
                       tick={{ fontSize: 11, fill: tickColor }}
                       stroke={axisStroke}
-                      width={35}
+                      width={40}
                       tickFormatter={(value) => `${value}`}
+                      yAxisId="left"
                     />
                     <Tooltip 
                       contentStyle={{ 
@@ -216,6 +218,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                       y={user.targetWeight} 
                       stroke={tickColor} 
                       strokeDasharray="5 5"
+                      yAxisId="left"
                       label={{ 
                         value: '目標', 
                         position: 'insideTopRight',
@@ -231,6 +234,27 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                       strokeWidth={2}
                       dot={{ fill: '#10b981', r: 4 }}
                       activeDot={{ r: 6 }}
+                      yAxisId="left"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            {/* 固定的 Y 軸覆蓋層 */}
+            <div 
+              className="absolute left-0 top-0 bottom-0 pointer-events-none bg-white dark:bg-gray-800" 
+              style={{ width: '45px' }}
+            >
+              <div className="w-full h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 5, right: 0, left: 10, bottom: chartData.length > 14 ? 50 : 5 }}>
+                    <YAxis 
+                      domain={[minTick, maxTick]}
+                      ticks={ticks}
+                      tick={{ fontSize: 11, fill: tickColor }}
+                      stroke={axisStroke}
+                      width={35}
+                      tickFormatter={(value) => `${value}`}
                     />
                   </LineChart>
                 </ResponsiveContainer>
