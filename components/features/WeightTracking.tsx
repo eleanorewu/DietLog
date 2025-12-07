@@ -214,9 +214,15 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                     />
                     <ReferenceLine 
                       y={user.targetWeight} 
-                      stroke="#10b981" 
+                      stroke={tickColor} 
                       strokeDasharray="5 5"
-                      label={{ value: '目標', position: 'right', fill: '#10b981', fontSize: 12 }}
+                      label={{ 
+                        value: '目標', 
+                        position: 'insideTopRight',
+                        fill: tickColor, 
+                        fontSize: 12,
+                        offset: 10
+                      }}
                     />
                     <Line 
                       type="monotone" 
