@@ -180,7 +180,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
           </div>
           <div className="h-64 relative">
             <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 320), height: '100%' }}>
+              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 35, 320), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: chartData.length > 14 ? 50 : 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />

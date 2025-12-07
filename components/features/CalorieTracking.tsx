@@ -84,7 +84,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
             </div>
           ) : (
             <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 40, 320), height: '100%' }}>
+              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 28, 320), height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: chartData.length > 14 ? 65 : 35 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -132,7 +132,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
                       dataKey="calories" 
                       fill="#10b981"
                       radius={[8, 8, 0, 0]}
-                      barSize={8}
+                      barSize={12}
                     />
                   </BarChart>
                 </ResponsiveContainer>
