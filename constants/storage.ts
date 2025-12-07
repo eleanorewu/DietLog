@@ -19,4 +19,5 @@ export type View =
   | 'settings' 
   | 'edit-profile' 
   | 'calendar' 
-  | 'weight-data-list';
+  | 'weight-data-list'
+  | 'calorie-data-list';

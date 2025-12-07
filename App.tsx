@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList, AuthPage } from './components/pages';
+import { Onboarding, Dashboard, FoodEntry, EditProfile, MonthCalendarView, WeightDataList, CalorieDataList, AuthPage } from './components/pages';
 import { WeightTracking, CalorieTracking } from './components/features';
 import { ThemeToggle, Dialog, Loading } from './components/ui';
 import { FoodLog, UserProfile, WeightRecord } from './types';
@@ -469,6 +469,7 @@ function App() {
                   <CalorieTracking
                     user={user}
                     logs={logs}
+                    onNavigateToDataList={() => navigateTo('calorie-data-list')}
                   />
 
                   {/* Weight Tracking Section */}
@@ -497,6 +498,14 @@ function App() {
               weightRecords={weightRecords}
               onBack={() => navigateTo('settings')}
               onDeleteWeightRecord={deleteWeightRecord}
+            />
+          )}
+
+          {/* Calorie Data List View */}
+          {view === 'calorie-data-list' && user && (
+            <CalorieDataList
+              logs={logs}
+              onBack={() => navigateTo('settings')}
             />
           )}
         </div>

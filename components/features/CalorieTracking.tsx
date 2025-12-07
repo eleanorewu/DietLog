@@ -7,9 +7,10 @@ import { useTheme } from '../../contexts/ThemeContext';
 interface CalorieTrackingProps {
   user: UserProfile;
   logs: FoodLog[];
+  onNavigateToDataList?: () => void;
 }
 
-export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) => {
+export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs, onNavigateToDataList }) => {
   const { theme } = useTheme();
   const [showList, setShowList] = useState(false);
   
@@ -67,7 +68,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs }) 
           <h3 className="text-base font-bold text-slate-700 dark:text-gray-200">卡路里</h3>
           {hasAnyLogs && (
             <button
-              onClick={() => setShowList(!showList)}
+              onClick={onNavigateToDataList}
               className="flex items-center gap-2 px-3 py-2 hover:bg-slate-100 dark:hover:bg-gray-600 rounded-lg transition-colors duration-150"
             >
               <List className="text-slate-600 dark:text-gray-300" size={16} />
