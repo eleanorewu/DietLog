@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FoodLog, MealType } from '../../types';
 import { Button } from '../ui/Button';
-import { generateId, getTodayString, isFutureDate } from '../../utils';
+import { generateId, getTodayString, isFutureDate, roundToDecimal } from '../../utils';
 import { LogOut, Image as ImageIcon, Trash2, Lock } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { Dialog } from '../ui/Dialog';
@@ -142,10 +142,11 @@ export const FoodEntry: React.FC<FoodEntryProps> = ({
         mealType: formData.mealType,
         // Firestore 不允許 undefined，只能是具體值或不存在該欄位
         ...(photoPreview ? { photoUrl: photoPreview } : {}),
-        calories: Number(formData.calories) || 0,
-        protein: Number(formData.protein) || 0,
-        fat: Number(formData.fat) || 0,
-        carbs: Number(formData.carbs) || 0,
+        // 使用 roundToDecimal 修正浮點數精度，保留一位小數
+        calories: roundToDecimal(Number(formData.calories) || 0),
+        protein: roundToDecimal(Number(formData.protein) || 0),
+        fat: roundToDecimal(Number(formData.fat) || 0),
+        carbs: roundToDecimal(Number(formData.carbs) || 0),
       };
       
       await onSave(log);

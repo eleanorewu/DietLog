@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { FoodLog, UserProfile, MealType } from '../../types';
 import { ChevronLeft, ChevronRight, Settings, Lock, AlertCircle, Calendar, Trash2, Image } from 'lucide-react';
-import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday } from '../../utils';
+import { isFutureDate, getTodayString, getWeekStart, getWeekDays, getPreviousWeekStart, getNextWeekStart, getDayName, isToday, roundToDecimal } from '../../utils';
 import { SwipeableItem } from '../features/SwipeableItem';
 import { Dialog } from '../ui/Dialog';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -55,10 +55,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   // Filter logs by the selected date
   const todaysLogs = logs.filter((log) => log.date === selectedDate);
 
-  const totalCalories = todaysLogs.reduce((acc, log) => acc + log.calories, 0);
-  const totalProtein = todaysLogs.reduce((acc, log) => acc + log.protein, 0);
-  const totalFat = todaysLogs.reduce((acc, log) => acc + log.fat, 0);
-  const totalCarbs = todaysLogs.reduce((acc, log) => acc + log.carbs, 0);
+  // 使用 roundToDecimal 修正浮點數精度問題
+  const totalCalories = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.calories, 0));
+  const totalProtein = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.protein, 0));
+  const totalFat = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.fat, 0));
+  const totalCarbs = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.carbs, 0));
 
   const remaining = user.targetCalories - totalCalories;
   const isOver = remaining < 0;
@@ -115,7 +116,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const renderMealSection = (type: MealType, title: string) => {
     const meals = todaysLogs.filter((l) => l.mealType === type);
-    const cals = meals.reduce((acc, m) => acc + m.calories, 0);
+    const cals = roundToDecimal(meals.reduce((acc, m) => acc + m.calories, 0));
     const isFutureDate_flag = isFutureDate(selectedDate);
 
     return (

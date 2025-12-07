@@ -96,6 +96,18 @@ export const calculateMacros = (targetCalories: number, goal: Goal) => {
   };
 };
 
+/**
+ * 修正浮點數精度問題
+ * 將數字四捨五入到指定的小數位數，避免出現 28.799999999999997 這樣的問題
+ * @param num 要處理的數字
+ * @param decimals 保留的小數位數，默認為 1
+ * @returns 修正後的數字
+ */
+export const roundToDecimal = (num: number, decimals: number = 1): number => {
+  const multiplier = Math.pow(10, decimals);
+  return Math.round(num * multiplier) / multiplier;
+};
+
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 9);
 };
