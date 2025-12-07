@@ -451,12 +451,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-400 mb-1">
                   約 {calculateWeeksToTarget()} 週
                 </p>
-                <p className="text-sm text-slate-600 dark:text-gray-300">
-                  從目前 {Number(formData.weight).toFixed(2)} kg 到目標 {Number(formData.targetWeight).toFixed(2)} kg
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 leading-relaxed">
+                  從目前 {Number(formData.weight).toFixed(1)} kg 到目標 {Number(formData.targetWeight).toFixed(1)} kg
                 </p>
-                <p className="text-xs text-slate-500 dark:text-gray-400 mt-2">
-                  需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
-                  每週減 {Number(formData.weeklyWeightLoss).toFixed(2)} kg
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                  需減重 {Math.abs(weightNum - targetWeightNum).toFixed(1)} kg，
+                  每週減 {Number(formData.weeklyWeightLoss).toFixed(1)} kg
                 </p>
               </div>
             )}

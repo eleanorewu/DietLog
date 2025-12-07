@@ -26,6 +26,11 @@ export const CalorieDataList: React.FC<CalorieDataListProps> = ({
       }
     });
     
+    // 使用 roundToDecimal 修正浮點數精度問題
+    Object.keys(dailyData).forEach(date => {
+      dailyData[date] = Math.round(dailyData[date] * 10) / 10;
+    });
+    
     return dailyData;
   };
 
@@ -70,7 +75,7 @@ export const CalorieDataList: React.FC<CalorieDataListProps> = ({
                     <div className="flex-1">
                       <div className="flex items-baseline gap-2 mb-1">
                         <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                          {calories}
+                          {calories.toFixed(1)}
                         </span>
                         <span className="text-base font-medium text-slate-600 dark:text-gray-300">kcal</span>
                       </div>

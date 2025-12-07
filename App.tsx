@@ -468,11 +468,11 @@ function App() {
                       </div>
                       <div className="flex justify-between items-center">
                          <span className="text-sm text-slate-600 dark:text-gray-400">目標體重</span>
-                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.targetWeight.toFixed(2)} kg</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.targetWeight.toFixed(1)} kg</span>
                       </div>
                       <div className="flex justify-between items-center">
                          <span className="text-sm text-slate-600 dark:text-gray-400">每週減重</span>
-                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.weeklyWeightLoss.toFixed(2)} kg</span>
+                         <span className="font-bold text-slate-900 dark:text-gray-100">{user.weeklyWeightLoss.toFixed(1)} kg</span>
                       </div>
                     </div>
                   </div>

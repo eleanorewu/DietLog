@@ -26,6 +26,11 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs, on
       }
     });
     
+    // 使用 roundToDecimal 修正浮點數精度問題
+    Object.keys(dailyData).forEach(date => {
+      dailyData[date] = Math.round(dailyData[date] * 10) / 10;
+    });
+    
     return dailyData;
   };
 
@@ -112,7 +117,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs, on
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                      {item.calories}
+                      {item.calories.toFixed(1)}
                     </span>
                     <span className="text-xs text-slate-500 dark:text-gray-400">
                       kcal
@@ -158,7 +163,7 @@ export const CalorieTracking: React.FC<CalorieTrackingProps> = ({ user, logs, on
                         color: theme === 'dark' ? '#E5E7EB' : '#475569'
                       }}
                       labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
-                      formatter={(value: number) => [`${value} kcal`, '攝取熱量']}
+                      formatter={(value: number) => [`${value.toFixed(1)} kcal`, '攝取熱量']}
                       cursor={{ fill: 'transparent' }}
                     />
                     {/* 目標熱量參考線 */}

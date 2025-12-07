@@ -267,12 +267,12 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               <p className="text-xl font-bold text-blue-700 dark:text-blue-400 mb-1">
                 約 {calculateWeeksToTarget()} 週
               </p>
-              <p className="text-xs text-slate-600 dark:text-gray-300">
-                從目前 {weightNum.toFixed(2)} kg 到目標 {targetWeightNum.toFixed(2)} kg
+              <p className="text-sm text-emerald-600 dark:text-emerald-400 leading-relaxed">
+                從目前 {weightNum.toFixed(1)} kg 到目標 {targetWeightNum.toFixed(1)} kg
               </p>
               <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
-                需減重 {Math.abs(weightNum - targetWeightNum).toFixed(2)} kg，
-                每週減 {weeklyWeightLossNum.toFixed(2)} kg
+                需減重 {Math.abs(weightNum - targetWeightNum).toFixed(1)} kg，
+                每週減 {weeklyWeightLossNum.toFixed(1)} kg
               </p>
             </div>
           )}

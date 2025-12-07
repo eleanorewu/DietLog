@@ -61,7 +61,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const totalFat = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.fat, 0));
   const totalCarbs = roundToDecimal(todaysLogs.reduce((acc, log) => acc + log.carbs, 0));
 
-  const remaining = user.targetCalories - totalCalories;
+  const remaining = roundToDecimal(user.targetCalories - totalCalories);
   const isOver = remaining < 0;
 
   const data = [
@@ -107,7 +107,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <AlertCircle size={14} className="text-red-500 flex-shrink-0" />
           )}
           <div className={`text-xs font-medium tabular-nums whitespace-nowrap ${valueColorClass}`}>
-            {current} / {target}g
+            {current.toFixed(1)} / {target}g
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="mb-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-bold text-slate-800 dark:text-gray-200">{title}</h3>
-          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{cals} kcal</span>
+          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{cals.toFixed(1)} kcal</span>
         </div>
         <div className="space-y-2">
           {meals.map((meal) => (
@@ -152,13 +152,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div className="flex-1">
                   <h4 className="font-medium text-slate-800 dark:text-gray-200 text-sm">{meal.name}</h4>
                   <p className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-2">
-                    <span>{meal.calories} kcal</span>
+                    <span>{meal.calories.toFixed(1)} kcal</span>
                     <span className="text-slate-300 dark:text-gray-600">|</span>
-                    <span>蛋:{meal.protein}g</span>
+                    <span>蛋:{meal.protein.toFixed(1)}g</span>
                     <span className="text-slate-300 dark:text-gray-600">|</span>
-                    <span>碳:{meal.carbs}g</span>
+                    <span>碳:{meal.carbs.toFixed(1)}g</span>
                     <span className="text-slate-300 dark:text-gray-600">|</span>
-                    <span>脂:{meal.fat}g</span>
+                    <span>脂:{meal.fat.toFixed(1)}g</span>
                   </p>
                 </div>
                 
@@ -297,7 +297,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-colors duration-200">
                 <p className="text-xs text-slate-500 dark:text-gray-400 font-medium mb-1">已攝取</p>
-                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{totalCalories}</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{totalCalories.toFixed(1)}</p>
                 <p className="text-xs text-slate-500 dark:text-gray-400 font-medium">kcal</p>
               </div>
               <div className="bg-slate-50 dark:bg-gray-700 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-colors duration-200">
@@ -338,7 +338,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className={`text-3xl font-bold ${isOver ? 'text-red-500' : 'text-emerald-500'}`}>
-                    {Math.abs(remaining)}
+                    {Math.abs(remaining).toFixed(1)}
                   </span>
                   <span className="text-xs text-slate-400 uppercase font-bold tracking-wide">
                     {isOver ? '超標' : '剩餘'}

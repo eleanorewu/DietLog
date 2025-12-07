@@ -53,7 +53,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   };
 
   // Calculate weight progress (使用當前體重)
-  const weightProgress = currentWeight - user.targetWeight;
+  const weightProgress = Math.round((currentWeight - user.targetWeight) * 10) / 10;
   const totalWeightToLose = Math.abs(weightProgress);
   
   // Calculate estimated weeks to reach target
@@ -140,7 +140,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
           <div>
             <div className="flex items-baseline gap-2 mb-3">
               <span className="text-2xl font-bold text-green-700 dark:text-green-500">
-                {currentWeight.toFixed(2)}
+                {currentWeight.toFixed(1)}
               </span>
               <span className="text-lg font-medium text-slate-600 dark:text-gray-400">kg</span>
             </div>
@@ -150,7 +150,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600 dark:text-gray-400">還需減重</span>
-                    <span className="font-bold text-orange-600 dark:text-orange-400">{totalWeightToLose.toFixed(2)} kg</span>
+                    <span className="font-bold text-orange-600 dark:text-orange-400">{totalWeightToLose.toFixed(1)} kg</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600 dark:text-gray-400">預估達成時間</span>
@@ -159,7 +159,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                 </div>
               ) : weightProgress < 0 ? (
                 <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  🎉 已超過目標 {Math.abs(weightProgress).toFixed(2)} kg
+                  🎉 已超過目標 {Math.abs(weightProgress).toFixed(1)} kg
                 </p>
               ) : (
                 <p className="text-sm text-green-600 dark:text-green-400 font-medium">
@@ -216,7 +216,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
                         color: theme === 'dark' ? '#E5E7EB' : '#475569'
                       }}
                       labelStyle={{ color: theme === 'dark' ? '#E5E7EB' : '#475569' }}
-                      formatter={(value: number) => [`${value.toFixed(2)} kg`, '體重']}
+                      formatter={(value: number) => [`${value.toFixed(1)} kg`, '體重']}
                     />
                     <ReferenceLine 
                       y={user.targetWeight} 
