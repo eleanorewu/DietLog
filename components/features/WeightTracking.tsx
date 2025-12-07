@@ -19,7 +19,13 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
 }) => {
   const { theme } = useTheme();
   const [isEditingWeight, setIsEditingWeight] = useState(false);
-  const [weightInput, setWeightInput] = useState(user.weight.toString());
+  
+  // 取得最新體重記錄（當前體重）
+  const currentWeight = weightRecords.length > 0 
+    ? weightRecords.sort((a, b) => b.timestamp - a.timestamp)[0].weight 
+    : user.weight;
+  
+  const [weightInput, setWeightInput] = useState(currentWeight.toString());
 
   // Helper function to handle decimal input with max 2 decimal places
   const handleDecimalInput = (value: string, setter: (val: string) => void) => {
@@ -42,12 +48,12 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
   };
 
   const handleCancelWeightEdit = () => {
-    setWeightInput(user.weight.toString());
+    setWeightInput(currentWeight.toString());
     setIsEditingWeight(false);
   };
 
-  // Calculate weight progress
-  const weightProgress = user.weight - user.targetWeight;
+  // Calculate weight progress (使用當前體重)
+  const weightProgress = currentWeight - user.targetWeight;
   const totalWeightToLose = Math.abs(weightProgress);
   
   // Calculate estimated weeks to reach target
@@ -134,7 +140,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
           <div>
             <div className="flex items-baseline gap-2 mb-3">
               <span className="text-2xl font-bold text-green-700 dark:text-green-500">
-                {user.weight.toFixed(2)}
+                {currentWeight.toFixed(2)}
               </span>
               <span className="text-lg font-medium text-slate-600 dark:text-gray-400">kg</span>
             </div>
@@ -180,7 +186,7 @@ export const WeightTracking: React.FC<WeightTrackingProps> = ({
           </div>
           <div className="h-64 relative">
             <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-              <div style={{ minWidth: '100%', width: Math.max(chartData.length * 50, 320), height: '100%' }}>
+              <div style={{ minWidth: '100%', width: chartData.length * 50, height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: chartData.length > 14 ? 50 : 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />

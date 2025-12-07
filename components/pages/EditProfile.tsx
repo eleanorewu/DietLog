@@ -137,7 +137,9 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">體重 (kg)<span className="text-red-500 dark:text-red-400">*</span></label>
+              <label className="block text-xs font-bold text-slate-400 dark:text-gray-500 mb-1">
+                初始體重 (kg)<span className="text-red-500 dark:text-red-400">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.weight}
@@ -147,6 +149,13 @@ export const EditProfile: React.FC<EditProfileProps> = ({ user, onSave, onCancel
                 required
               />
             </div>
+          </div>
+
+          {/* 提示訊息 */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-3 rounded-lg">
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              💡 <strong>初始體重</strong>用於計算基礎代謝率。日常體重測量請使用「當前體重」功能。
+            </p>
           </div>
 
           {/* BMI Display with Progress Bar - left-aligned vertical layout */}

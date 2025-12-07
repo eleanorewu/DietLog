@@ -74,7 +74,7 @@ export const CalorieDataList: React.FC<CalorieDataListProps> = ({
                         </span>
                         <span className="text-base font-medium text-slate-600 dark:text-gray-300">kcal</span>
                       </div>
-                      <span className="text-sm font-medium text-slate-700 dark:text-gray-200">
+                      <span className="text-sm text-slate-500 dark:text-gray-400">
                         {displayDate}
                       </span>
                     </div>

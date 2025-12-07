@@ -182,7 +182,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       <div className="">
         <div className="px-6 py-8 text-center">
           {/* Logo */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-3 overflow-hidden">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-slate-300/50 dark:shadow-gray-700/50 mb-3 overflow-hidden">
             <img 
               src="/icons/icon-192.png" 
               alt="DietLog Logo" 

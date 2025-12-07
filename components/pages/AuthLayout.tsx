@@ -11,7 +11,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitl
     <div className="h-full flex flex-col items-center justify-center px-6 py-8 overflow-y-auto transition-colors duration-300">
       {/* Logo 和標題區 */}
       <div className="text-center mb-4 mt-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30 mb-3 overflow-hidden">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-slate-300/50 dark:shadow-gray-700/50 mb-3 overflow-hidden">
           <img 
             src="/icons/icon-192.png" 
             alt="DietLog Logo" 

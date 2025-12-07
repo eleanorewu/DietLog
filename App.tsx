@@ -195,23 +195,8 @@ function App() {
     if (!user) return;
 
     try {
-      // 重新計算所有指標
-      const bmr = calculateBMR(user.gender, newWeight, user.height, user.age);
-      const tdee = calculateTDEE(bmr, user.activityLevel);
-      const targetCalories = calculateTargetCalories(tdee, user.goal);
-      const macros = calculateMacros(targetCalories, user.goal);
-
-      const updatedProfile: UserProfile = {
-        ...user,
-        weight: newWeight,
-        tdee,
-        targetCalories,
-        targetProtein: macros.protein,
-        targetFat: macros.fat,
-        targetCarbs: macros.carbs,
-      };
-
-      await updateUser(updatedProfile);
+      // 只新增體重記錄，不更新 user.weight
+      // user.weight 保持為初始體重或基準體重
       await handleAddWeightRecord(newWeight);
     } catch (error) {
       console.error('Failed to update weight:', error);
@@ -222,14 +207,7 @@ function App() {
     try {
       const today = getTodayString();
       
-      // 檢查今天是否已有體重記錄
-      const existingRecord = weightRecords.find(record => record.date === today);
-      
-      if (existingRecord) {
-        // 如果今天已有記錄，先刪除舊的
-        await deleteWeightRecord(existingRecord.id);
-      }
-      
+      // 移除「當天只保留一筆」的限制，保留所有測量記錄
       // 新增新的體重記錄
       const newRecord: WeightRecord = {
         id: Date.now().toString(),
@@ -240,6 +218,40 @@ function App() {
       await addWeightRecord(newRecord);
     } catch (error) {
       console.error('Failed to add weight record:', error);
+    }
+  };
+
+  const handleDeleteWeightRecord = async (recordId: string) => {
+    if (!user) return;
+    
+    try {
+      await deleteWeightRecord(recordId);
+      
+      // 刪除後，如果還有記錄，用最新的記錄更新 user.weight（用於基礎代謝計算）
+      const remainingRecords = weightRecords.filter(r => r.id !== recordId);
+      if (remainingRecords.length > 0) {
+        const latestRecord = remainingRecords.sort((a, b) => b.timestamp - a.timestamp)[0];
+        
+        // 更新 user.weight 並重新計算代謝指標
+        const bmr = calculateBMR(user.gender, latestRecord.weight, user.height, user.age);
+        const tdee = calculateTDEE(bmr, user.activityLevel);
+        const targetCalories = calculateTargetCalories(tdee, user.goal);
+        const macros = calculateMacros(targetCalories, user.goal);
+
+        const updatedProfile: UserProfile = {
+          ...user,
+          weight: latestRecord.weight,
+          tdee,
+          targetCalories,
+          targetProtein: macros.protein,
+          targetFat: macros.fat,
+          targetCarbs: macros.carbs,
+        };
+
+        await updateUser(updatedProfile);
+      }
+    } catch (error) {
+      console.error('Failed to delete weight record:', error);
     }
   };
 
@@ -497,7 +509,7 @@ function App() {
             <WeightDataList
               weightRecords={weightRecords}
               onBack={() => navigateTo('settings')}
-              onDeleteWeightRecord={deleteWeightRecord}
+              onDeleteWeightRecord={handleDeleteWeightRecord}
             />
           )}
 
